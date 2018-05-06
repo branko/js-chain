@@ -1,7 +1,5 @@
 // Todo:
 
-// get Transactions for address
-// calculate total for address
 // implement public/private keys
 //
 //
@@ -34,15 +32,16 @@ class Blockchain {
     this.pendingTransactions = [];
     this.difficulty = 2;
 
-    const createGenesisBlock = () => {               ///////// Turn into IIFE
-      const gb = new Block('0', null, []);
+    // creates genesis block
+    (() => {
+      const gb = new Block('0', null, [
+        new Transaction(null, 'Steven', 100),
+        new Transaction(null, 'Branko', 100),
+      ]);
       gb.hash = this.SHA('hello world');
       gb.nonce = 0;
-
       this.chain.push(gb);
-    };
-
-    createGenesisBlock();
+    })();
   }
 
   SHA(str) {
@@ -54,7 +53,6 @@ class Blockchain {
     newBlock.nonce = 0;
 
     while (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
-      console.log(this.SHA(newBlock));
       newBlock.nonce++;
     }
 
@@ -79,7 +77,44 @@ class Blockchain {
   }
 
   getTransactionsForAddress(address) {
-    // Todo
+    let transactionsForAddress = [];
+    this.chain.forEach(block => {
+      block.transactions.forEach(transaction => {
+        if (transaction.fromAddress === address || transaction.toAddress === address) {
+          transactionsForAddress.push(transaction);
+        }
+      })
+    })
+    return transactionsForAddress;
+  }
+
+  getBalanceForAddress(address) {
+    let balance = 0;
+    this.chain.forEach(block => {
+      block.transactions.forEach(transaction => {
+        if (transaction.toAddress === address) {
+          balance += transaction.amount;
+        } else if (transaction.fromAddress === address) {
+          balance -= transaction.amount;
+        }
+      })
+    })
+    return balance;
+  }
+
+  validTransactionsForAddress(address) {
+    let balance = 0;
+    for (let transaction of this.getTransactionsForAddress(address)) {
+      if (transaction.toAddress === address) {
+        balance += transaction.amount;
+      } else if (transaction.fromAddress === address) {
+        balance -= transaction.amount;
+        if (balance < 0) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   toString() {
@@ -90,7 +125,7 @@ class Blockchain {
 const blockchain = new Blockchain();
 
 console.log("Adding transactions... ")
-blockchain.createTransaction('Steven', 'Branko', '1')
+blockchain.createTransaction('Steven', 'Branko', 1)
 
 console.log('Mining block...')
 blockchain.mineBlock();
@@ -98,6 +133,11 @@ console.log('Mining block...')
 blockchain.mineBlock();
 
 blockchain.toString();
+console.log("Blockchain is valid: ", blockchain.isValid());
+blockchain.createTransaction('Branko', 'Steven', 2);
+blockchain.mineBlock();
 
 
-console.log("Blockchain is valid: ", blockchain.isValid())
+console.log(blockchain.validTransactionsForAddress('Steven'));
+console.log(blockchain.getBalanceForAddress('Steven'));
+console.log(blockchain.getBalanceForAddress('Branko'));
