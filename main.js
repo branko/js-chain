@@ -1,40 +1,92 @@
+// Todo:
+
+// Make SHA function which returns SHA.toString()
+// Does SHA need a string, or can it just hash a javascript object?
+// get Transactions for address
+// calculate total for address
+// implement public/private keys
+//
+//
+
 const SHA256 = require('crypto-js/sha256');
 
+class Transaction {
+  constructor(fromAddress, toAddress, amount) {
+    this.fromAddress = fromAddress;
+    this.toAddress = toAddress;
+    this.amount = amount;
+  }
+}
+
 class Block {
-  constructor(timestamp, previousHash, data) {
+  constructor(timestamp, previousHash, transactions) {
     this.timestamp = timestamp;
     this.previousHash = previousHash;
-    this.data = data;
+    this.transactions = transactions;
+  }
 
-    // this.hash = ;
+  toString() {
+    console.log(JSON.stringify(this, null, 2));
   }
 }
 
 class Blockchain {
   constructor() {
     this.chain = [];
-    this.difficulty = 1;
+    this.pendingTransactions = [];
+    this.difficulty = 2;
 
-    const createGenesisBlock = () => {
+    const createGenesisBlock = () => {               ///////// Turn into IIFE
       const gb = new Block('0', null, []);
       gb.hash = SHA256('hello world').toString();
+      gb.nonce = 0;
+
       this.chain.push(gb);
     };
 
     createGenesisBlock();
   }
 
-  mineBlock() {
-    let nonce = 0;
-    let hashStr;
-    let str = `${gb.timestamp}${gb.previousHash}${gb.data}${nonce}`
-    while (SHA256(str).substring(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
-      nonce++;
-      str = `${gb.timestamp}${gb.previousHash}${gb.data}${nonce}`
-    }
-    let hashedString = SHA256(str).toString();
-    let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, 'fake data');
+  SHA() {
+    // Todo
+  }
 
+  mineBlock() {
+    let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
+
+    let nonce = 0;
+    let str = `${newBlock.timestamp}${newBlock.previousHash}${newBlock.data}${nonce}`
+
+    while (SHA256(str).toString().slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
+      nonce++;
+      str = `${newBlock.timestamp}${newBlock.previousHash}${newBlock.data}${nonce}`
+    }
+
+    let hashedString = SHA256(str).toString();
+
+    newBlock.nonce = nonce;
+    newBlock.hash = hashedString;
+
+    this.chain.push(newBlock);
+    this.pendingTransactions = [];
+  }
+
+  isValid() {
+    for (let i = 1; i < this.chain.length; i++) {
+      if (this.chain[i].previousHash !== this.chain[i - 1].hash) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  createTransaction(fromAddress, toAddress, amount) {
+    this.pendingTransactions.push(new Transaction(fromAddress, toAddress, amount))
+  }
+
+  getTransactionsForAddress(address) {
+    // Todo
   }
 
   toString() {
@@ -43,4 +95,31 @@ class Blockchain {
 }
 
 const blockchain = new Blockchain();
+
+console.log("Adding transactions... ")
+blockchain.createTransaction('Steven', 'Branko', '1')
+
+console.log('Mining block...')
+blockchain.mineBlock();
+console.log('Mining block...')
+blockchain.mineBlock();
+
 blockchain.toString();
+
+
+console.log("Blockchain is valid: ", blockchain.isValid())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
