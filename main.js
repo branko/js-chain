@@ -1,7 +1,5 @@
 // Todo:
 
-// Make SHA function which returns SHA.toString()
-// Does SHA need a string, or can it just hash a javascript object?
 // get Transactions for address
 // calculate total for address
 // implement public/private keys
@@ -38,7 +36,7 @@ class Blockchain {
 
     const createGenesisBlock = () => {               ///////// Turn into IIFE
       const gb = new Block('0', null, []);
-      gb.hash = SHA256('hello world').toString();
+      gb.hash = this.SHA('hello world');
       gb.nonce = 0;
 
       this.chain.push(gb);
@@ -47,25 +45,20 @@ class Blockchain {
     createGenesisBlock();
   }
 
-  SHA() {
-    // Todo
+  SHA(str) {
+    return SHA256(JSON.stringify(str)).toString();
   }
 
   mineBlock() {
     let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
+    newBlock.nonce = 0;
 
-    let nonce = 0;
-    let str = `${newBlock.timestamp}${newBlock.previousHash}${newBlock.data}${nonce}`
-
-    while (SHA256(str).toString().slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
-      nonce++;
-      str = `${newBlock.timestamp}${newBlock.previousHash}${newBlock.data}${nonce}`
+    while (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
+      console.log(this.SHA(newBlock));
+      newBlock.nonce++;
     }
 
-    let hashedString = SHA256(str).toString();
-
-    newBlock.nonce = nonce;
-    newBlock.hash = hashedString;
+    newBlock.hash = this.SHA(newBlock);
 
     this.chain.push(newBlock);
     this.pendingTransactions = [];
@@ -108,18 +101,3 @@ blockchain.toString();
 
 
 console.log("Blockchain is valid: ", blockchain.isValid())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
