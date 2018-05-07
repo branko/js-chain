@@ -26,12 +26,17 @@ function validateIncomingBlockchain(incoming, current) {
 
 app.use(bodyParser.json()) // Gives us access to body-parser
 
+
 app.get('/', (req, res) => {
+  res.send('fuck you');
+})
+
+app.get('/blockchain', (req, res) => {
   res.setHeader('Content-Type', 'application/json')
   res.send(Cache.readJSON());
 })
 
-app.post('/', (req, res) => {
+app.post('/blockchain', (req, res) => {
   let incomingBlockchain = req.body;
 
   if (true) {

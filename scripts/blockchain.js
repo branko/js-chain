@@ -51,7 +51,7 @@ class Blockchain {
 
     var request = new XMLHttpRequest();
 
-    request.open('POST', 'http://929a9650.ngrok.io/')
+    request.open('POST', 'https://fierce-oasis-50675.herokuapp.com/blockchain')
     request.setRequestHeader('Content-Type', 'application/json')
 
     request.send(JSON.stringify(this));
