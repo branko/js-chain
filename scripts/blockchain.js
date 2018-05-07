@@ -34,6 +34,7 @@ class Blockchain {
   }
 
   mineBlock() {
+
     let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
     newBlock.nonce = 0;
 
@@ -41,11 +42,11 @@ class Blockchain {
     //   newBlock.nonce++;
     // }
 
-    const hashBlockInterval = setInterval(() => {
+    this.miningInterval = setInterval(() => {
       if (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
         newBlock.nonce++;
       } else {
-        clearInterval(hashBlockInterval);
+        clearInterval(this.miningInterval);
         newBlock.hash = this.SHA(newBlock);
 
         this.chain.push(newBlock);
@@ -72,7 +73,7 @@ class Blockchain {
 
   createTransaction(fromAddress, toAddress, amount) {
     if (this.getBalanceForAddress(fromAddress) >= amount) {
-      this.pendingTransactions.push(new Transaction(fromAddress, toAddress, amount));
+      this.pendingTransactions.push(new Transaction(Date.now(), fromAddress, toAddress, amount));
       return true;
     } else {
       return false;

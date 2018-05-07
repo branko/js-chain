@@ -60,8 +60,10 @@ app.post('/blockchain', (req, res) => {
 
 const mine = setInterval(() => {
   console.log("Mining...");
-  blockchain.createTransaction('Steven', 'Branko', 50);
-  blockchain.mineBlock();
-}, 10000);
+  if (!blockchain.miningInterval) {
+    blockchain.createTransaction('Steven', 'Branko', 50);
+    blockchain.mineBlock();
+  }
+}, 5000);
 
 app.listen(process.env.PORT || 3000, () => console.log('Example app listening on port 3000!'))
