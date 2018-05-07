@@ -1,4 +1,5 @@
 const Block = require('./block');
+const Cache = require('./cache');
 const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 
@@ -18,6 +19,10 @@ class Blockchain {
       gb.hash = this.SHA('hello world');
       gb.nonce = 0;
       this.chain.push(gb);
+      // read write
+      Cache.write(this);
+      console.log(Cache.readJSON());
+      //
     })();
   }
 
@@ -37,6 +42,11 @@ class Blockchain {
 
     this.chain.push(newBlock);
     this.pendingTransactions = [];
+
+    // read write
+    Cache.write(this.toString());
+    console.log(Cache.readJSON());
+    //
   }
 
   isValid() {
@@ -95,12 +105,8 @@ class Blockchain {
   }
 
   toString() {
-    console.log(JSON.stringify(this, null, 2));
+    return JSON.stringify(this, null, 2);
   }
 }
 
 module.exports = Blockchain;
-
-
-
-
