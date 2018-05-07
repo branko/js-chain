@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
-const Cache = require('./cache')
-const Blockchain = require('./blockchain')
+const Cache = require('./scripts/cache')
+const Blockchain = require('./scripts/blockchain')
 const bodyParser = require('body-parser')
 
 function validateIncomingBlockchain(incoming, current) {

@@ -6,16 +6,22 @@
 //
 //
 
-const Blockchain = require('./blockchain');
-const Block = require('./block');
+const Blockchain = require('./scripts/blockchain');
+const Block = require('./scripts/block');
 
 const blockchain = new Blockchain();
-const Cache = require('./cache');
+const Cache = require('./scripts/cache');
 
-blockchain.createTransaction('Steven', 'Branko', 1);
-blockchain.mineBlock();
-blockchain.createTransaction('Steven', 'Branko', 1);
-blockchain.mineBlock();
+let counter = 1
+while (counter <= 50) {
+  blockchain.createTransaction('Steven', 'Branko', 0.001);
+  blockchain.mineBlock();
+  counter++
+  console.log(counter)
+}
+
+// blockchain.createTransaction('Steven', 'Branko', 1);
+// blockchain.mineBlock();
 
 
 // console.log('Mining block...')
