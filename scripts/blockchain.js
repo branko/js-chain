@@ -68,7 +68,12 @@ class Blockchain {
   }
 
   createTransaction(fromAddress, toAddress, amount) {
-    this.pendingTransactions.push(new Transaction(fromAddress, toAddress, amount))
+    if (getBalanceForAddress(fromAddress) >= amount) {
+      this.pendingTransactions.push(new Transaction(fromAddress, toAddress, amount));
+      return true;
+    } else {
+      return false;
+    }
   }
 
   getTransactionsForAddress(address) {
