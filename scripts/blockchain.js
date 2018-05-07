@@ -8,7 +8,7 @@ class Blockchain {
   constructor() {
     this.chain = [];
     this.pendingTransactions = [];
-    this.difficulty = 5;
+    this.difficulty = 4;
 
     // creates genesis block
     (() => {
