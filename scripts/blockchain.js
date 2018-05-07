@@ -34,7 +34,6 @@ class Blockchain {
   }
 
   mineBlock() {
-    console.log(Array.isArray(this.chain))
     let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
     newBlock.nonce = 0;
 
