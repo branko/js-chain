@@ -12,12 +12,9 @@ const Block = require('./scripts/block');
 const blockchain = new Blockchain();
 const Cache = require('./scripts/cache');
 
-let counter = 1
-while (counter <= 50) {
-  blockchain.createTransaction('Steven', 'Branko', 0.001);
+while (true) {
+  blockchain.createTransaction('Steven', 'Branko', 0.1);
   blockchain.mineBlock();
-  counter++
-  console.log(counter)
 }
 
 // blockchain.createTransaction('Steven', 'Branko', 1);

@@ -8,7 +8,7 @@ class Blockchain {
   constructor() {
     this.chain = [];
     this.pendingTransactions = [];
-    this.difficulty = 1;
+    this.difficulty = 5;
 
     // creates genesis block
     (() => {
@@ -34,6 +34,7 @@ class Blockchain {
   }
 
   mineBlock() {
+    console.log(Array.isArray(this.chain))
     let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
     newBlock.nonce = 0;
 

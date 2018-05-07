@@ -1,8 +1,16 @@
-const express = require('express')
-const app = express()
-const Cache = require('./scripts/cache')
-const Blockchain = require('./scripts/blockchain')
-const bodyParser = require('body-parser')
+const express = require('express');
+const app = express();
+const Cache = require('./scripts/cache');
+const Blockchain = require('./scripts/blockchain');
+const bodyParser = require('body-parser');
+
+const blockchain = new Blockchain();
+
+if (JSON.parse(Cache.readJSON())) {
+  blockchain.chain = JSON.parse(Cache.readJSON()).chain;
+} else {
+  Cache.write(blockchain);
+}
 
 function validateIncomingBlockchain(incoming, current) {
   for (block of incoming.chain) {
@@ -28,7 +36,7 @@ app.use(bodyParser.json()) // Gives us access to body-parser
 
 
 app.get('/', (req, res) => {
-  res.send('fuck you');
+  res.send(':)');
 })
 
 app.get('/blockchain', (req, res) => {
@@ -38,9 +46,9 @@ app.get('/blockchain', (req, res) => {
 
 app.post('/blockchain', (req, res) => {
   let incomingBlockchain = req.body;
+  let currentBlockchain = JSON.parse(Cache.readJSON());
 
-  if (true) {
-    let current = JSON.parse(Cache.readJSON())
+  if (validateIncomingBlockchain(incomingBlockchain, currentBlockchain)) {
 
     if (current.chain.length < incomingBlockchain.chain.length) {
       Cache.write(JSON.stringify(incomingBlockchain, null, 4));
@@ -49,5 +57,9 @@ app.post('/blockchain', (req, res) => {
     res.send('Invalid blockchain.')
   }
 })
+
+const mine = setInterval(() => {
+  blockchain.mineBlock();
+}, 1000);
 
 app.listen(process.env.PORT || 3000, () => console.log('Example app listening on port 3000!'))
