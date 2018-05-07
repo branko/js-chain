@@ -37,24 +37,27 @@ class Blockchain {
     let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
     newBlock.nonce = 0;
 
-    while (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
-      newBlock.nonce++;
-    }
+    // while (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
+    //   newBlock.nonce++;
+    // }
 
-    newBlock.hash = this.SHA(newBlock);
+    const hashBlockInterval = setInterval(() => {
+      if (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
+        newBlock.nonce++;
+      } else {
+        clearInterval(hashBlockInterval);
+        newBlock.hash = this.SHA(newBlock);
 
-    this.chain.push(newBlock);
-    this.pendingTransactions = [];
-
-    // read write
-    Cache.write(this.toString());
-
-    var request = new XMLHttpRequest();
-
-    request.open('POST', 'https://fierce-oasis-50675.herokuapp.com/blockchain')
-    request.setRequestHeader('Content-Type', 'application/json')
-
-    request.send(JSON.stringify(this));
+        this.chain.push(newBlock);
+        this.pendingTransactions = [];
+        // read write
+        Cache.write(this.toString());
+        const request = new XMLHttpRequest();
+        request.open('POST', 'https://fierce-oasis-50675.herokuapp.com/blockchain')
+        request.setRequestHeader('Content-Type', 'application/json')
+        request.send(JSON.stringify(this));
+      }
+    }, 0);
   }
 
   isValid() {
