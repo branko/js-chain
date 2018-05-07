@@ -31,6 +31,7 @@ function validateIncomingBlockchain(incoming, current) {
   }
   return true
 }
+app.use(bodyParser.urlencoded())
 
 app.use(bodyParser.json()) // Gives us access to body-parser
 
@@ -58,9 +59,16 @@ app.post('/blockchain', (req, res) => {
   }
 })
 
+app.post('/transactions', (req, res) => {
+  let fromAddress = req.body.from;
+  let toAddress = req.body.to;
+  let amount = Number(req.body.amount);
+  blockchain.createTransaction(fromAddress, toAddress, amount);
+})
+
 const mine = setInterval(() => {
   if (!blockchain.miningInterval) {
-    blockchain.createTransaction('Steven', 'Branko', 50);
+    // blockchain.createTransaction('Steven', 'Branko', 50);
     blockchain.mineBlock();
   }
 }, 5000);
