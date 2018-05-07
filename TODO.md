@@ -5,6 +5,7 @@
   - minimum transactions to begin mining
 - Organize javascript files: place in /scripts
   - this will require rerouting of blockchain.json file
+- Generate sk/pk using RSA
 
 # Long term
 - Make front end to interact with blockchain
