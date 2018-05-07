@@ -7,6 +7,7 @@
 - Organize javascript files: place in /scripts
   - this will require rerouting of blockchain.json file
 - Generate sk/pk using RSA
+- Move validation to its own class and use as mixin?
 
 
 # Long term
