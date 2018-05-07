@@ -26,6 +26,10 @@ class Blockchain {
     })();
   }
 
+  static SHA(str) {
+    return SHA256(JSON.stringify(str)).toString();
+  }
+
   SHA(str) {
     return SHA256(JSON.stringify(str)).toString();
   }
@@ -45,7 +49,14 @@ class Blockchain {
 
     // read write
     Cache.write(this.toString());
-    console.log(Cache.readJSON());
+
+    // var request = new XMLHttpRequest();
+
+    // request.open('POST', 'http://01a4df6a.ngrok.io/')
+    // request.setRequestHeader('Content-Type', 'application/json')
+
+    // request.send(JSON.stringify(this))
+
     //
   }
 
