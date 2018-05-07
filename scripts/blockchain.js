@@ -8,7 +8,7 @@ class Blockchain {
   constructor() {
     this.chain = [];
     this.pendingTransactions = [];
-    this.difficulty = 4;
+    this.difficulty = 3;
 
     // creates genesis block
     (() => {
@@ -34,7 +34,7 @@ class Blockchain {
   }
 
   mineBlock() {
-
+    console.log("Mining...");
     let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
     newBlock.nonce = 0;
 
@@ -46,8 +46,8 @@ class Blockchain {
       if (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
         newBlock.nonce++;
       } else {
-        clearInterval(this.miningInterval);
-        this.miningInterval = null;
+        console.log("adding block");
+        console.log("--------------");
         newBlock.hash = this.SHA(newBlock);
 
         this.chain.push(newBlock);
@@ -58,6 +58,8 @@ class Blockchain {
         request.open('POST', 'https://fierce-oasis-50675.herokuapp.com/blockchain')
         request.setRequestHeader('Content-Type', 'application/json')
         request.send(JSON.stringify(this));
+        clearInterval(this.miningInterval);
+        this.miningInterval = null;
       }
     }, 0);
   }

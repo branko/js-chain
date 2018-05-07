@@ -59,7 +59,6 @@ app.post('/blockchain', (req, res) => {
 })
 
 const mine = setInterval(() => {
-  console.log("Mining...");
   if (!blockchain.miningInterval) {
     blockchain.createTransaction('Steven', 'Branko', 50);
     blockchain.mineBlock();
