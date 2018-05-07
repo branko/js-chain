@@ -1,6 +1,5 @@
 class Transaction {
-  constructor(timestamp, fromAddress, toAddress, amount) {
-    this.timestamp = timestamp;
+  constructor(fromAddress, toAddress, amount) {
     this.fromAddress = fromAddress;
     this.toAddress = toAddress;
     this.amount = amount;

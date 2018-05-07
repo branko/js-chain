@@ -47,6 +47,7 @@ class Blockchain {
         newBlock.nonce++;
       } else {
         clearInterval(this.miningInterval);
+        this.miningInterval = null;
         newBlock.hash = this.SHA(newBlock);
 
         this.chain.push(newBlock);
@@ -73,7 +74,7 @@ class Blockchain {
 
   createTransaction(fromAddress, toAddress, amount) {
     if (this.getBalanceForAddress(fromAddress) >= amount) {
-      this.pendingTransactions.push(new Transaction(Date.now(), fromAddress, toAddress, amount));
+      this.pendingTransactions.push(new Transaction(fromAddress, toAddress, amount));
       return true;
     } else {
       return false;
