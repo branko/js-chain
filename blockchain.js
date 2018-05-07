@@ -2,7 +2,7 @@ const Block = require('./block');
 const Cache = require('./cache');
 const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
-
+const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 class Blockchain {
   constructor() {
@@ -20,8 +20,7 @@ class Blockchain {
       gb.nonce = 0;
       this.chain.push(gb);
       // read write
-      Cache.write(this);
-      console.log(Cache.readJSON());
+      Cache.write(this.toString());
       //
     })();
   }
@@ -50,14 +49,12 @@ class Blockchain {
     // read write
     Cache.write(this.toString());
 
-    // var request = new XMLHttpRequest();
+    var request = new XMLHttpRequest();
 
-    // request.open('POST', 'http://01a4df6a.ngrok.io/')
-    // request.setRequestHeader('Content-Type', 'application/json')
+    request.open('POST', 'http://929a9650.ngrok.io/')
+    request.setRequestHeader('Content-Type', 'application/json')
 
-    // request.send(JSON.stringify(this))
-
-    //
+    request.send(JSON.stringify(this));
   }
 
   isValid() {

@@ -2,11 +2,12 @@ const express = require('express')
 const app = express()
 const Cache = require('./cache')
 const Blockchain = require('./blockchain')
+const bodyParser = require('body-parser')
 
-validateIncomingBlockchain(incoming, current) {
+function validateIncomingBlockchain(incoming, current) {
   for (block of incoming.chain) {
     let {timestamp, previousHash, transactions, nonce} = block;
-    
+
     newBlock = {
       timestamp,
       previousHash,
@@ -15,13 +16,15 @@ validateIncomingBlockchain(incoming, current) {
     }
 
     let newBlockHash = Blockchain.SHA(newBlock)
-    
+
     if (newBlockHash !== block.hash) {
       return false
     };
-  })
+  }
   return true
 }
+
+app.use(bodyParser.json()) // Gives us access to body-parser
 
 app.get('/', (req, res) => {
   res.setHeader('Content-Type', 'application/json')
@@ -29,12 +32,13 @@ app.get('/', (req, res) => {
 })
 
 app.post('/', (req, res) => {
-  let incomingBlockchain = JSON.parse(req);
+  let incomingBlockchain = req.body;
 
-  if (validateIncomingBlockchain(incomingBlockchain)) {
+  if (true) {
     let current = JSON.parse(Cache.readJSON())
+
     if (current.chain.length < incomingBlockchain.chain.length) {
-      Cache.write(incomingBlockchain);
+      Cache.write(JSON.stringify(incomingBlockchain, null, 4));
     }
   } else {
     res.send('Invalid blockchain.')
@@ -42,5 +46,3 @@ app.post('/', (req, res) => {
 })
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
-
-
