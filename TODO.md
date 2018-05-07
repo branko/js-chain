@@ -2,7 +2,7 @@
 - Implement validation in post (client.js).
 - Implement dynamic IP tracking of peer (blockchain.js).
 - Put addresses in local .json and iterate over them to send posts after mining a block
-- Broadcast transactions
+- Broadcast transactions using "Signaling Server"
   - minimum transactions to begin mining
 - Organize javascript files: place in /scripts
   - this will require rerouting of blockchain.json file
