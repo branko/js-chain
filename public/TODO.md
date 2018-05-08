@@ -1,6 +1,6 @@
 # Short term
 
-- Optimize blockchain.json size
+- Optimize blockchain.json size => Maybe don't mind blocks without transactions?
 - Implement dynamic IP tracking of peer (blockchain.js).
 - Put addresses in local .json and iterate over them to send posts after mining a block
 - Broadcast transactions using "Signaling Server"
