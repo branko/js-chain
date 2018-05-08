@@ -40,6 +40,8 @@ app.get('/', (req, res) => {
   res.send(':)');
 })
 
+
+
 app.get('/blockchain', (req, res) => {
   res.setHeader('Content-Type', 'application/json')
   res.send(Cache.readJSON());

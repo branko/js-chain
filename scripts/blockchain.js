@@ -3,6 +3,7 @@ const Cache = require('./cache');
 const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+const RSA = require('./rsa')
 
 class Blockchain {
   constructor() {
