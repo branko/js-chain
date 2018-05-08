@@ -1,5 +1,6 @@
 # Short term
 
+- Style exchange using bootstrap
 - Implement rewards for miners
 - Optimize blockchain.json size => Maybe don't mind blocks without transactions?
 - Implement dynamic IP tracking of peer (blockchain.js).
@@ -12,6 +13,9 @@
   - Also add timestamps to wallet#show in exchange
 
 # Long term
-- Add bootstrap to rails
+- Make CLI + GUI for client.js
+  - Enter your pk/sk for rewards
+  - Enter if you want to enable mining
+  - Have GUI for mining process and track incoming/outgoing requests
 - Make front end to interact with blockchain
 - Migrate to Diglet instead of ngrok
