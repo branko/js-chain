@@ -35,12 +35,9 @@ app.use(bodyParser.urlencoded())
 
 app.use(bodyParser.json()) // Gives us access to body-parser
 
-
 app.get('/', (req, res) => {
   res.send(':)');
 })
-
-
 
 app.get('/blockchain', (req, res) => {
   res.setHeader('Content-Type', 'application/json')
@@ -52,7 +49,6 @@ app.post('/blockchain', (req, res) => {
   let currentBlockchain = JSON.parse(Cache.readJSON());
 
   if (validateIncomingBlockchain(incomingBlockchain, currentBlockchain)) {
-
     if (current.chain.length < incomingBlockchain.chain.length) {
       Cache.write(JSON.stringify(incomingBlockchain, null, 4));
     }
@@ -65,14 +61,14 @@ app.post('/transactions', (req, res) => {
   let fromAddress = req.body.from;
   let toAddress = req.body.to;
   let amount = Number(req.body.amount);
-  blockchain.createTransaction(fromAddress, toAddress, amount);
+
+  console.log(`Incoming transaction! from: ${fromAddress}, to: ${toAddress}, amount: ${amount}`);
+
+  let validTransaction = blockchain.createTransaction(fromAddress, toAddress, amount);
+
+  res.send(`${validTransaction ? 'Successful transaction' : 'Transaction failed'}`)
 })
 
-const mine = setInterval(() => {
-  if (!blockchain.miningInterval) {
-    // blockchain.createTransaction('Steven', 'Branko', 50);
-    blockchain.mineBlock();
-  }
-}, 5000);
+blockchain.beginMining();
 
 app.listen(process.env.PORT || 3000, () => console.log('Example app listening on port 3000!'))
