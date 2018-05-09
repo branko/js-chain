@@ -1,0 +1,49 @@
+const crypto = require('crypto');
+const exec = require('child_process').exec;
+const fs = require('fs');
+
+class RSA {
+
+  static generateKeys() {
+    exec('openssl genrsa -out privkey.pem 1024', 'utf8', () => {
+      exec('openssl rsa -in privkey.pem -pubout > pubkey.pub', 'utf8');
+    })
+  }
+
+  static getPrivateKey() {
+    return fs.readFileSync('privkey.pem').toString();
+  }
+
+  static getPublicKey() {
+    return fs.readFileSync('pubkey.pub').toString();
+  }
+
+  static sign(message, privateKey) {
+    const sign = crypto.createSign('SHA256');
+    sign.write(message);
+    const signature = sign.sign(privateKey, 'hex');
+
+    return signature
+  }
+
+  static verify(message, publicKey, signature) {
+    const verify = crypto.createVerify('SHA256');
+
+    verify.update(message);
+
+    return verify.verify(publicKey, signature, 'hex')
+  }
+
+}
+
+// Typical workflow:
+
+// let privateKey = RSA.getPrivateKey();
+// let publicKey = RSA.getPublicKey();
+
+// let transaction = JSON.stringify({ fromAddress: publicKey, toAddress: "Steven", amount: 100 })
+// let fakeTransaction = JSON.stringify({ fromAddress: publicKey, toAddress: "Steven", amount: 100 })
+
+// let signature = RSA.sign(transaction, privateKey)
+
+// console.log(RSA.verify(fakeTransaction, publicKey, signature))
