@@ -11,19 +11,8 @@ class Blockchain {
     this.pendingTransactions = [];
     this.difficulty = 3;
 
-    // creates genesis block
-    (() => {
-      const gb = new Block('0', null, [
-        new Transaction(null, 'Steven', 100),
-        new Transaction(null, 'Branko', 100),
-      ]);
-      gb.hash = this.SHA('hello world');
-      gb.nonce = 0;
-      this.chain.push(gb);
-      // read write
-      Cache.write(this.toString());
-      //
-    })();
+    // Create genesis block
+    this.createGenesisBlock();
   }
 
   static SHA(str) {
@@ -34,33 +23,50 @@ class Blockchain {
     return SHA256(JSON.stringify(str)).toString();
   }
 
+  createGenesisBlock() {
+    const genesisBlock = new Block('0', null, [
+      new Transaction(null, 'Steven', 100),
+      new Transaction(null, 'Branko', 100),
+    ]);
+
+    genesisBlock.hash = this.SHA('hello world');
+    genesisBlock.nonce = 0;
+
+    this.chain.push(genesisBlock);
+
+    Cache.write(this.toString());
+  }
+
   mineBlock() {
-    console.log("Mining...");
+    console.log("\n-------------\nMining...\n");
+    this.currentlyMining = true;
+
     let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
     newBlock.nonce = 0;
 
-    // while (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
-    //   newBlock.nonce++;
-    // }
-
-    this.miningInterval = setInterval(() => {
+    let miningInterval = setInterval(() => {
       if (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
         newBlock.nonce++;
       } else {
-        console.log("adding block");
-        console.log("--------------");
         newBlock.hash = this.SHA(newBlock);
+
+        // This is ugly because of whitespace appearing when logging, it looks nice when logged
+        console.log(`Block #${this.chain.length} added:
+nonce: ${newBlock.nonce},
+hash: ${newBlock.hash}
+-------------\n\n`);
 
         this.chain.push(newBlock);
         this.pendingTransactions = [];
-        // read write
+
+        // Write to local .json file and make a broadcast POST to known peers
         Cache.write(this.toString());
         const request = new XMLHttpRequest();
         request.open('POST', 'https://fierce-oasis-50675.herokuapp.com/blockchain')
         request.setRequestHeader('Content-Type', 'application/json')
         request.send(JSON.stringify(this));
-        clearInterval(this.miningInterval);
-        this.miningInterval = null;
+        clearInterval(miningInterval);
+        this.currentlyMining = false;
       }
     }, 0);
   }
@@ -76,7 +82,7 @@ class Blockchain {
   }
 
   createTransaction(fromAddress, toAddress, amount) {
-    if (this.getBalanceForAddress(fromAddress) >= amount) {
+    if (this.getBalanceForAddress(fromAddress) >= +amount) {
       this.pendingTransactions.push(new Transaction(fromAddress, toAddress, amount));
       return true;
     } else {
@@ -98,15 +104,18 @@ class Blockchain {
 
   getBalanceForAddress(address) {
     let balance = 0;
+
     this.chain.forEach(block => {
       block.transactions.forEach(transaction => {
+
         if (transaction.toAddress === address) {
-          balance += transaction.amount;
+          balance += +transaction.amount;
         } else if (transaction.fromAddress === address) {
-          balance -= transaction.amount;
+          balance -= +transaction.amount;
         }
       })
     })
+
     return balance;
   }
 
@@ -123,6 +132,23 @@ class Blockchain {
       }
     }
     return true;
+  }
+
+  beginMining() {
+    const mine = setInterval(() => {
+
+      // Dummy transaction
+      if (Math.random() > 0.5) {
+        this.createTransaction('Steven', 'Branko', Math.ceil(5 * Math.random()));
+      } else {
+        this.createTransaction('Branko', 'Steven', Math.ceil(5 * Math.random()));
+      }
+
+      if (!this.currentlyMining) {
+        this.mineBlock();
+      }
+
+    }, 5000);
   }
 
   toString() {
