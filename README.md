@@ -6,6 +6,7 @@ Created by Steven Shen and Branko Culum
 # Todos:
 ## Short term
 
+- `Cache.readJSON` is redundant, but read must return a parsed object, code might break elsewhere
 - **Migrate to Diglet instead of ngrok (Thursday)**
   - https://github.com/bookchin/diglet
 - Add timestamps to transactions and hash transactionID
