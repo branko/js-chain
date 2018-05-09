@@ -35,6 +35,8 @@ app.use(bodyParser.urlencoded())
 
 app.use(bodyParser.json()) // Gives us access to body-parser
 
+
+// GET Requests
 app.get('/', (req, res) => {
   res.send(':)');
 })
@@ -44,6 +46,11 @@ app.get('/blockchain', (req, res) => {
   res.send(Cache.readJSON());
 })
 
+app.get('/transaction', (req, res) => {
+  res.sendFile('index.html', { root: __dirname })
+})
+
+// POST Requests
 app.post('/blockchain', (req, res) => {
   let incomingBlockchain = req.body;
   let currentBlockchain = JSON.parse(Cache.readJSON());
@@ -57,16 +64,17 @@ app.post('/blockchain', (req, res) => {
   }
 })
 
-app.post('/transactions', (req, res) => {
-  let fromAddress = req.body.from;
-  let toAddress = req.body.to;
-  let amount = Number(req.body.amount);
+app.post('/transaction', (req, res) => { // Validate Transaction
+  const fromAddress = req.body.from;
+  const toAddress = req.body.to;
+  const amount = Number(req.body.amount);
+  const validTransaction = blockchain.createTransaction(fromAddress, toAddress, amount);
 
-  console.log(`Incoming transaction! from: ${fromAddress}, to: ${toAddress}, amount: ${amount}`);
-
-  let validTransaction = blockchain.createTransaction(fromAddress, toAddress, amount);
-
-  res.send(`${validTransaction ? 'Successful transaction' : 'Transaction failed'}`)
+  if (validTransaction) {
+    res.send(`Pending transaction: ${fromAddress} to ${toAddress} for the amount of $${amount}`)
+  } else {
+    res.send(`Transaction declined: Insufficient funds.`)
+  }
 })
 
 blockchain.beginMining();

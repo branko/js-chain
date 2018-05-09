@@ -1,31 +1,31 @@
-// const forge = require('node-forge')
+const forge = require('node-forge')
 
-// const rsa = forge.pki.rsa;
+const rsa = forge.pki.rsa;
 
-// class RSA {
-//   static generateKeyPair() {
-//     const keypair = rsa.generateKeyPair({bits: 2048, e: 0x10001});
+class RSA {
+  static generateKeyPair() {
+    const keypair = rsa.generateKeyPair({bits: 2048, e: 0x10001});
 
-//     return keypair
-//   }
+    return keypair
+  }
 
-//   static signTransaction(privateKey, transaction) {
-//     let messageDigest = forge.md.sha1.create();
-//     messageDigest.update(transaction, 'utf8');
+  static signTransaction(privateKey, transaction) {
+    let messageDigest = forge.md.sha1.create();
+    messageDigest.update(transaction, 'utf8');
 
-//     let signature = privateKey.sign(messageDigest);
-//     return signature
-//   }
+    let signature = privateKey.sign(messageDigest);
+    return signature
+  }
 
-//   static verifyTransaction(transaction, publicKey, signature) {
-//     let md = forge.md.sha1.create();
+  static verifyTransaction(transaction, publicKey, signature) {
+    let md = forge.md.sha1.create();
 
-//     md.update(transaction, 'utf8');
+    md.update(transaction, 'utf8');
 
-//     let verified = publicKey.verify(md.digest().bytes(), signature);
+    let verified = publicKey.verify(md.digest().bytes(), signature);
 
-//     return verified
-//   }
-// }
+    return verified
+  }
+}
 
-// module.exports = RSA;
+module.exports = RSA;
