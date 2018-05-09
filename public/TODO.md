@@ -1,6 +1,7 @@
 # Short term
 
 **- Migrate to Diglet instead of ngrok (Thursday)**
+  - https://github.com/bookchin/diglet
 - Add timestamps to transactions and hash transactionID
   - Also add timestamps to wallet#show in exchange
 - Style exchange using bootstrap
