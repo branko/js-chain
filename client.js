@@ -3,6 +3,10 @@ const app = express();
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
 const bodyParser = require('body-parser');
+const readline = require('readline');
+
+// Clears the screen; I think it only works on mac
+process.stdout.write('\033c')
 
 const blockchain = new Blockchain();
 
@@ -34,7 +38,6 @@ function validateIncomingBlockchain(incoming, current) {
 app.use(bodyParser.urlencoded())
 
 app.use(bodyParser.json()) // Gives us access to body-parser
-
 
 // GET Requests
 app.get('/', (req, res) => {
@@ -77,6 +80,45 @@ app.post('/transaction', (req, res) => { // Validate Transaction
   }
 })
 
-blockchain.beginMining();
 
-app.listen(process.env.PORT || 3000, () => console.log('Example app listening on port 3000!'))
+
+
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log("\n==================")
+  console.log("Welcome to js-chain")
+  console.log("==================\n")
+  console.log('Example app listening on port 3000!')
+
+
+
+  ///////// Ask for inputs
+  // We can use this to optionally start mining
+  // Or as for private/public keys
+  // Or ask for a name to use
+  // Ask for a default URL for diglet/peers
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  let name;
+
+  rl.question('\n\nWould you like to begin mining? [y/n]\n\n\n', (answer) => {
+    if (answer === 'y') {
+      console.log('You chose to start mining...')
+      blockchain.beginMining();
+    } else {
+      console.log("You chose not to mine\n\n")
+    }
+    rl.close();
+  });
+
+  /////////
+})
+
+
+
+
+
