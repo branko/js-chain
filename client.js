@@ -4,9 +4,11 @@ const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
 const bodyParser = require('body-parser');
 const readline = require('readline');
+const RSA = require('./rsa');
+const fs = require('fs');
 
 // Clears the screen; I think it only works on mac
-process.stdout.write('\033c')
+process.stdout.write('\033c');
 
 const blockchain = new Blockchain();
 
@@ -91,7 +93,6 @@ app.listen(process.env.PORT || 3000, () => {
   console.log('Example app listening on port 3000!')
 
 
-
   ///////// Ask for inputs
   // We can use this to optionally start mining
   // Or as for private/public keys
@@ -103,7 +104,20 @@ app.listen(process.env.PORT || 3000, () => {
     output: process.stdout
   });
 
-  let name;
+
+  // Check for public/private key stored locally
+
+  // privkey.pem
+  // pubkey.pub
+
+
+
+  // IF no keys detected => prompt: would you like to generate a pair of keys?
+    // IF no => exit
+    // IF yes => continue
+
+
+
 
   rl.question('\n\nWould you like to begin mining? [y/n]\n\n\n', (answer) => {
     if (answer === 'y') {
