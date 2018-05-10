@@ -3,8 +3,18 @@ const app = express();
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
 const bodyParser = require('body-parser');
+const readline = require('readline');
+const RSA = require('./rsa');
+const fs = require('fs');
+
+// Clears the screen; I think it only works on mac
+process.stdout.write('\033c');
 
 const blockchain = new Blockchain();
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
 if (JSON.parse(Cache.readJSON())) {
   blockchain.chain = JSON.parse(Cache.readJSON()).chain;
@@ -31,10 +41,35 @@ function validateIncomingBlockchain(incoming, current) {
   }
   return true
 }
+
+function promptKeyGeneration() {
+  rl.question('\n\nWould you like to generate a private + public key? [y/n]\n\n\n', (answer) => {
+    if (answer === 'y') {
+      console.log("Generating keys...");
+      RSA.generateKeys(promptMining);
+    } else {
+      console.log("You must generate keys before proceeding.");
+      return promptKeyGeneration();
+    }
+    return;
+  });
+}
+
+function promptMining() {
+  rl.question('\n\nWould you like to begin mining? [y/n]\n\n\n', (answer) => {
+    if (answer === 'y') {
+      console.log('You chose to start mining...');
+      blockchain.beginMining();
+    } else {
+      console.log("You chose not to mine\n\n");
+    }
+    rl.close();
+  });
+}
+
 app.use(bodyParser.urlencoded())
 
 app.use(bodyParser.json()) // Gives us access to body-parser
-
 
 // GET Requests
 app.get('/', (req, res) => {
@@ -43,7 +78,7 @@ app.get('/', (req, res) => {
 
 app.get('/blockchain', (req, res) => {
   res.setHeader('Content-Type', 'application/json')
-  res.send(Cache.readJSON());
+  res.send(JSON.stringify(blockchain));
 })
 
 app.get('/transaction', (req, res) => {
@@ -73,10 +108,19 @@ app.post('/transaction', (req, res) => { // Validate Transaction
   if (validTransaction) {
     res.send(`Pending transaction: ${fromAddress} to ${toAddress} for the amount of $${amount}`)
   } else {
-    res.send(`Transaction declined: Insufficient funds.`)
+    res.send(`Transaction declined: ${fromAddress} to ${toAddress} for the amount of $${amount}`);
   }
 })
 
-blockchain.beginMining();
+app.listen(process.env.PORT || 3000, () => {
+  console.log("\n==================")
+  console.log("Welcome to js-chain")
+  console.log("==================\n")
+  console.log('Example app listening on port 3000!')
 
-app.listen(process.env.PORT || 3000, () => console.log('Example app listening on port 3000!'))
+  if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys/pubkey.pub')) {
+    promptKeyGeneration();
+  } else {
+    promptMining();
+  }
+})

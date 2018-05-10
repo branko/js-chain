@@ -3,7 +3,7 @@ const Cache = require('./cache');
 const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-const RSA = require('./rsa')
+// const RSA = require('./rsa')
 
 class Blockchain {
   constructor() {
@@ -37,8 +37,24 @@ class Blockchain {
     Cache.write(this.toString());
   }
 
+//   logBlock(chainLength, nonce, hash) {
+//     // This is ugly because of whitespace appearing when logging, it looks nice when logged
+//     console.log(`Block #${chainLength}:
+// nonce: ${nonce},
+// hash: ${hash}
+// -------------\n\n`);
+//   }
+
+  broadcastBlockchain(peerURL) {
+    const request = new XMLHttpRequest();
+
+    request.open('POST', peerURL)
+    request.setRequestHeader('Content-Type', 'application/json')
+    request.send(JSON.stringify(this));
+  }
+
   mineBlock() {
-    console.log("\n-------------\nMining...\n");
+    console.log(`\n=====================\n==== Mining block #${this.chain.length}\n`);
     this.currentlyMining = true;
 
     let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
@@ -47,24 +63,21 @@ class Blockchain {
     let miningInterval = setInterval(() => {
       if (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
         newBlock.nonce++;
+        if (newBlock.nonce % 100 === 0) { process.stdout.write('.') }
       } else {
         newBlock.hash = this.SHA(newBlock);
 
-        // This is ugly because of whitespace appearing when logging, it looks nice when logged
-        console.log(`Block #${this.chain.length} added:
-nonce: ${newBlock.nonce},
-hash: ${newBlock.hash}
--------------\n\n`);
+        process.stdout.write('\n\n~~~ Block Mined! ~~~\n\n')
+        console.log(newBlock.toString());
 
         this.chain.push(newBlock);
         this.pendingTransactions = [];
 
         // Write to local .json file and make a broadcast POST to known peers
         Cache.write(this.toString());
-        const request = new XMLHttpRequest();
-        request.open('POST', 'https://fierce-oasis-50675.herokuapp.com/blockchain')
-        request.setRequestHeader('Content-Type', 'application/json')
-        request.send(JSON.stringify(this));
+
+        this.broadcastBlockchain('https://fierce-oasis-50675.herokuapp.com/blockchain');
+
         clearInterval(miningInterval);
         this.currentlyMining = false;
       }

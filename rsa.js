@@ -3,10 +3,13 @@ const exec = require('child_process').exec;
 const fs = require('fs');
 
 class RSA {
-
-  static generateKeys() {
-    exec('openssl genrsa -out privkey.pem 1024', 'utf8', () => {
-      exec('openssl rsa -in privkey.pem -pubout > pubkey.pub', 'utf8');
+  static generateKeys(callback) {
+    if (!callback) {
+      callback = () => {}
+    }
+    fs.mkdirSync('./keys');
+    exec('openssl genrsa -out ./keys/privkey.pem 1024', 'utf8', () => {
+      exec('openssl rsa -in , ./keys/privkey.pem -pubout > ./keys/pubkey.pub', 'utf8', callback);
     })
   }
 
@@ -28,13 +31,12 @@ class RSA {
 
   static verify(message, publicKey, signature) {
     const verify = crypto.createVerify('SHA256');
-
     verify.update(message);
-
     return verify.verify(publicKey, signature, 'hex')
   }
-
 }
+
+module.exports = RSA;
 
 // Typical workflow:
 
