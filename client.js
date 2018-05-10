@@ -11,6 +11,10 @@ const fs = require('fs');
 process.stdout.write('\033c');
 
 const blockchain = new Blockchain();
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
 
 if (JSON.parse(Cache.readJSON())) {
   blockchain.chain = JSON.parse(Cache.readJSON()).chain;
@@ -37,6 +41,32 @@ function validateIncomingBlockchain(incoming, current) {
   }
   return true
 }
+
+function promptKeyGeneration() {
+  rl.question('\n\nWould you like to generate a private + public key? [y/n]\n\n\n', (answer) => {
+    if (answer === 'y') {
+      console.log("Generating keys...");
+      RSA.generateKeys(promptMining);
+    } else {
+      console.log("You must generate keys before proceeding.");
+      return promptKeyGeneration();
+    }
+    return;
+  });
+}
+
+function promptMining() {
+  rl.question('\n\nWould you like to begin mining? [y/n]\n\n\n', (answer) => {
+    if (answer === 'y') {
+      console.log('You chose to start mining...');
+      blockchain.beginMining();
+    } else {
+      console.log("You chose not to mine\n\n");
+    }
+    rl.close();
+  });
+}
+
 app.use(bodyParser.urlencoded())
 
 app.use(bodyParser.json()) // Gives us access to body-parser
@@ -48,7 +78,7 @@ app.get('/', (req, res) => {
 
 app.get('/blockchain', (req, res) => {
   res.setHeader('Content-Type', 'application/json')
-  res.send(Cache.readJSON());
+  res.send(JSON.stringify(blockchain));
 })
 
 app.get('/transaction', (req, res) => {
@@ -78,13 +108,9 @@ app.post('/transaction', (req, res) => { // Validate Transaction
   if (validTransaction) {
     res.send(`Pending transaction: ${fromAddress} to ${toAddress} for the amount of $${amount}`)
   } else {
-    res.send(`Transaction declined: Insufficient funds.`)
+    res.send(`Transaction declined: ${fromAddress} to ${toAddress} for the amount of $${amount}`);
   }
 })
-
-
-
-
 
 app.listen(process.env.PORT || 3000, () => {
   console.log("\n==================")
@@ -92,47 +118,9 @@ app.listen(process.env.PORT || 3000, () => {
   console.log("==================\n")
   console.log('Example app listening on port 3000!')
 
-
-  ///////// Ask for inputs
-  // We can use this to optionally start mining
-  // Or as for private/public keys
-  // Or ask for a name to use
-  // Ask for a default URL for diglet/peers
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-
-  // Check for public/private key stored locally
-
-  // privkey.pem
-  // pubkey.pub
-
-
-
-  // IF no keys detected => prompt: would you like to generate a pair of keys?
-    // IF no => exit
-    // IF yes => continue
-
-
-
-
-  rl.question('\n\nWould you like to begin mining? [y/n]\n\n\n', (answer) => {
-    if (answer === 'y') {
-      console.log('You chose to start mining...')
-      blockchain.beginMining();
-    } else {
-      console.log("You chose not to mine\n\n")
-    }
-    rl.close();
-  });
-
-  /////////
+  if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys/pubkey.pub')) {
+    promptKeyGeneration();
+  } else {
+    promptMining();
+  }
 })
-
-
-
-
-
