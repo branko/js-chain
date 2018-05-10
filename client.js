@@ -8,8 +8,11 @@ const RSA = require('./rsa');
 const fs = require('fs');
 
 // Clears the screen; I think it only works on mac
-process.stdout.write('\033c');
 
+// --help : brings up menu of commands
+// --mine : begins mining
+
+process.stdout.write('\033c');
 const blockchain = new Blockchain();
 const rl = readline.createInterface({
   input: process.stdin,
