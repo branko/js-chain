@@ -1,2 +1,3 @@
 *.json
 /public/*.json
+/node_modules
