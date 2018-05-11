@@ -3,15 +3,12 @@ const Cache = require('./cache');
 const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-// const RSA = require('./rsa')
 
 class Blockchain {
   constructor() {
     this.chain = [];
     this.pendingTransactions = [];
     this.difficulty = 3;
-
-    // Create genesis block
     this.createGenesisBlock();
   }
 
@@ -36,15 +33,7 @@ class Blockchain {
 
     Cache.write(this.toString());
   }
-
-//   logBlock(chainLength, nonce, hash) {
-//     // This is ugly because of whitespace appearing when logging, it looks nice when logged
-//     console.log(`Block #${chainLength}:
-// nonce: ${nonce},
-// hash: ${hash}
-// -------------\n\n`);
-//   }
-
+  
   broadcastBlockchain(peerURL) {
     const request = new XMLHttpRequest();
 

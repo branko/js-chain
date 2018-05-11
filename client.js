@@ -93,25 +93,19 @@ app.listen(process.env.PORT || 3000, () => {
   console.log("Welcome to js-chain")
   console.log("==================\n")
   console.log('Example app listening on port 3000!')
-
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
   });
 
-  rl.question('\n\nWould you like to begin mining? [y/n]\n\n\n', (answer) => {
-    if (answer === 'y') {
-      console.log('You chose to start mining...')
-      blockchain.beginMining();
-    } else {
-      console.log("You chose not to mine\n\n")
-    }
-    rl.close();
-  });
+  if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys/pubkey.pub')) {
+    promptKeyGeneration(rl);
+  } else {
+    promptMining(rl);
+  }
 })
 
-
-function promptKeyGeneration() {
+function promptKeyGeneration(rl) {
   rl.question('\n\nWould you like to generate a private + public key? [y/n]\n\n\n', (answer) => {
     if (answer === 'y') {
       console.log("Generating keys...");
@@ -124,7 +118,7 @@ function promptKeyGeneration() {
   });
 }
 
-function promptMining() {
+function promptMining(rl) {
   rl.question('\n\nWould you like to begin mining? [y/n]\n\n\n', (answer) => {
     if (answer === 'y') {
       console.log('You chose to start mining...');
@@ -135,12 +129,3 @@ function promptMining() {
     rl.close();
   });
 }
-
-if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys/pubkey.pub')) {
-  promptKeyGeneration();
-} else {
-  promptMining();
-}
-
-const identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
-kademlia(identity, seed);
