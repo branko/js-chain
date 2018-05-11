@@ -9,12 +9,10 @@ const fs = require('fs');
 const ip = require("ip");
 const kademlia = require('./kademlia');
 const SHA1 = require('crypto-js/sha1');
-const identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
-
-process.stdout.write('\033c');
 const blockchain = new Blockchain();
 const ipAddress = ip.address();
 
+process.stdout.write('\033c');
 const seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
   hostname: '167.99.180.30',
   port: 4000
@@ -144,4 +142,5 @@ if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys/pubkey.pub'))
   promptMining();
 }
 
+const identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
 kademlia(identity, seed);
