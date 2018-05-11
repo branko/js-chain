@@ -3,14 +3,18 @@ const exec = require('child_process').exec;
 const fs = require('fs');
 
 class RSA {
-  static generateKeys(callback) {
-    if (!callback) {
-      callback = () => {}
-    }
-    fs.mkdirSync('./keys');
-    exec('openssl genrsa -out ./keys/privkey.pem 1024', 'utf8', () => {
-      exec('openssl rsa -in ./keys/privkey.pem -pubout > ./keys/pubkey.pub', 'utf8', callback);
+  static generateKeys() {
+
+    let promise = new Promise(function(resolve, reject) {
+      fs.mkdirSync('./keys');
+      exec('openssl genrsa -out ./keys/privkey.pem 1024', 'utf8', () => {
+        exec('openssl rsa -in ./keys/privkey.pem -pubout > ./keys/pubkey.pub', 'utf8', () => {
+          resolve()
+        });
+      })
     })
+
+    return promise
   }
 
   static getPrivateKey() {

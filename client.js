@@ -101,6 +101,9 @@ app.listen(process.env.PORT || 3000, () => {
   if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys/pubkey.pub')) {
     promptKeyGeneration(rl);
   } else {
+    let identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
+    kademlia(identity, seed);
+
     promptMining(rl);
   }
 })
@@ -109,10 +112,15 @@ function promptKeyGeneration(rl) {
   rl.question('\n\nWould you like to generate a private + public key? [y/n]\n\n\n', (answer) => {
     if (answer === 'y') {
       console.log("Generating keys...");
-      RSA.generateKeys(promptMining);
+
+      RSA.generateKeys().then(function(val) {
+        let identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
+        kademlia(identity, seed);
+      });
+
     } else {
       console.log("You must generate keys before proceeding.");
-      return promptKeyGeneration();
+      return promptKeyGeneration(rl);
     }
     return;
   });
