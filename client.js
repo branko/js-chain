@@ -13,10 +13,11 @@ const blockchain = new Blockchain();
 const ipAddress = ip.address();
 
 process.stdout.write('\033c');
-const seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
-  hostname: '167.99.180.30',
-  port: 4000
-}];
+
+// const seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
+//   hostname: '167.99.180.30',
+//   port: 4000
+// }];
 
 if (JSON.parse(Cache.readJSON())) {
   blockchain.chain = JSON.parse(Cache.readJSON()).chain;
