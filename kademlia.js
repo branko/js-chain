@@ -31,6 +31,8 @@ function startKademlia(identity, seed) {
   } else {
     console.log('No seed found');
   }
+
+  return kademliaNode;
 }
 
 module.exports = startKademlia;

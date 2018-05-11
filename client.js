@@ -24,6 +24,8 @@ const seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
   port: 4000
 }];
 
+let kademliaNode;
+
 if (JSON.parse(Cache.readJSON())) {
   blockchain.chain = JSON.parse(Cache.readJSON()).chain;
 } else {
@@ -108,10 +110,14 @@ app.listen(process.env.PORT || 3000, () => {
     promptKeyGeneration(rl);
   } else {
     let identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
-    kademlia(identity, seed);
+    kademliaNode = kademlia(identity, seed);
 
     promptMining(rl);
   }
+
+  setInterval(() => {
+    console.log(kademliaNode.router);
+  }, 3000);
 })
 
 function promptKeyGeneration(rl) {
@@ -121,7 +127,7 @@ function promptKeyGeneration(rl) {
 
       RSA.generateKeys().then(function(val) {
         let identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
-        kademlia(identity, seed ? seed : undefined);
+        kademliaNode = kademlia(identity, seed ? seed : undefined);
         promptMining(rl);
       });
 
@@ -144,7 +150,3 @@ function promptMining(rl) {
     rl.close();
   });
 }
-
-setInterval(() => {
-  console.log(kademlia.router);
-}, 3000);
