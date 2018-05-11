@@ -6,10 +6,7 @@ const bodyParser = require('body-parser');
 const readline = require('readline');
 const RSA = require('./rsa');
 const fs = require('fs');
-var ip = require("ip");
-
-
-let ipAddress = ip.address();
+const ip = require("ip");
 
 // Clears the screen; I think it only works on mac
 
@@ -18,6 +15,7 @@ let ipAddress = ip.address();
 
 process.stdout.write('\033c');
 const blockchain = new Blockchain();
+const ipAddress = ip.address();
 
 if (JSON.parse(Cache.readJSON())) {
   blockchain.chain = JSON.parse(Cache.readJSON()).chain;
