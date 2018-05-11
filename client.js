@@ -144,3 +144,7 @@ function promptMining(rl) {
     rl.close();
   });
 }
+
+setInterval(() => {
+  console.log(kademlia.router);
+}, 3000);
