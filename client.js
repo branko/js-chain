@@ -15,12 +15,10 @@ process.stdout.write('\033c');
 const blockchain = new Blockchain();
 const ipAddress = ip.address();
 
-// const seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
-//   hostname: '167.99.180.30',
-//   port: 4000
-// }];
-
-kademlia(identity, seed);
+const seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
+  hostname: '167.99.180.30',
+  port: 4000
+}];
 
 if (JSON.parse(Cache.readJSON())) {
   blockchain.chain = JSON.parse(Cache.readJSON()).chain;
@@ -113,3 +111,37 @@ app.listen(process.env.PORT || 3000, () => {
     rl.close();
   });
 })
+
+
+function promptKeyGeneration() {
+  rl.question('\n\nWould you like to generate a private + public key? [y/n]\n\n\n', (answer) => {
+    if (answer === 'y') {
+      console.log("Generating keys...");
+      RSA.generateKeys(promptMining);
+    } else {
+      console.log("You must generate keys before proceeding.");
+      return promptKeyGeneration();
+    }
+    return;
+  });
+}
+
+function promptMining() {
+  rl.question('\n\nWould you like to begin mining? [y/n]\n\n\n', (answer) => {
+    if (answer === 'y') {
+      console.log('You chose to start mining...');
+      blockchain.beginMining();
+    } else {
+      console.log("You chose not to mine\n\n");
+    }
+    rl.close();
+  });
+}
+
+if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys/pubkey.pub')) {
+  promptKeyGeneration();
+} else {
+  promptMining();
+}
+
+kademlia(identity, seed);
