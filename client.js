@@ -7,15 +7,20 @@ const readline = require('readline');
 const RSA = require('./rsa');
 const fs = require('fs');
 const ip = require("ip");
-
-// Clears the screen; I think it only works on mac
-
-// --help : brings up menu of commands
-// --mine : begins mining
+const kademlia = require('./kademlia');
+const SHA1 = require('crypto-js/sha1');
+const identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
 
 process.stdout.write('\033c');
 const blockchain = new Blockchain();
 const ipAddress = ip.address();
+
+// const seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
+//   hostname: '167.99.180.30',
+//   port: 4000
+// }];
+
+kademlia(identity, seed);
 
 if (JSON.parse(Cache.readJSON())) {
   blockchain.chain = JSON.parse(Cache.readJSON()).chain;
@@ -87,38 +92,16 @@ app.post('/transaction', (req, res) => { // Validate Transaction
   }
 })
 
-
-
-
-
 app.listen(process.env.PORT || 3000, () => {
   console.log("\n==================")
   console.log("Welcome to js-chain")
   console.log("==================\n")
   console.log('Example app listening on port 3000!')
 
-
-  ///////// Ask for inputs
-  // We can use this to optionally start mining
-  // Or as for private/public keys
-  // Or ask for a name to use
-  // Ask for a default URL for diglet/peers
-
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
   });
-
-
-  // Check for public/private key stored locally
-
-  // privkey.pem
-  // pubkey.pub
-
-
-  // IF no keys detected => prompt: would you like to generate a pair of keys?
-    // IF no => exit
-    // IF yes => continue
 
   rl.question('\n\nWould you like to begin mining? [y/n]\n\n\n', (answer) => {
     if (answer === 'y') {
@@ -129,69 +112,4 @@ app.listen(process.env.PORT || 3000, () => {
     }
     rl.close();
   });
-
-  /////////
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////
-//////// Kademlia Kadence Node ///////////////
-//////////////////////////////////////////////
-
-// Kadence requirements
-
-const kadence = require('@kadenceproject/kadence');
-const levelup = require('levelup');
-const leveldown = require('leveldown');
-const encode = require('encoding-down');
-
-const kademliaNode = new kadence.KademliaNode({
-  identity: '0000000000000000000000000000000000000001',
-  transport: new kadence.HTTPTransport(),
-  storage: levelup(encode(leveldown('./'))),
-  contact: {
-    hostname: ip.address(),
-    port: 4000
-  }
-});
-
-// const seed = ['0000000000000000000000000000000000000000', { // (sample)
-//   hostname: '108.168.48.34',
-//   port: 4000
-// }];
-
-kademliaNode.once("join", function() {
- console.info(`connected to ${kademliaNode.router.size} peers`);
-});
-
-kademliaNode.once("error", function(err) {
- console.error("failed to join the network", err);
-});
-
-console.log("Listening on port " + kademliaNode.contact.port)
-kademliaNode.listen(kademliaNode.contact.port);
-
-// node.join(seed);
-
-////////////////////////////////////////////////
-////////////////////////////////////////////////
-////////////////////////////////////////////////
