@@ -1,3 +1,11 @@
+const fs = require('fs');
+const exec = require('child_process').exec;
+process.stdout.write('\033c');
+if (!fs.existsSync('public')) {
+  fs.mkdirSync('public');
+  exec('touch ./public/blockchain.json');
+}
+
 const express = require('express');
 const app = express();
 const Cache = require('./scripts/cache');
@@ -5,19 +13,16 @@ const Blockchain = require('./scripts/blockchain');
 const bodyParser = require('body-parser');
 const readline = require('readline');
 const RSA = require('./rsa');
-const fs = require('fs');
 const ip = require("ip");
 const kademlia = require('./kademlia');
 const SHA1 = require('crypto-js/sha1');
 const blockchain = new Blockchain();
 const ipAddress = ip.address();
 
-process.stdout.write('\033c');
-
-// const seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
-//   hostname: '167.99.180.30',
-//   port: 4000
-// }];
+const seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
+  hostname: '167.99.180.30',
+  port: 4000
+}];
 
 if (JSON.parse(Cache.readJSON())) {
   blockchain.chain = JSON.parse(Cache.readJSON()).chain;
@@ -116,7 +121,8 @@ function promptKeyGeneration(rl) {
 
       RSA.generateKeys().then(function(val) {
         let identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
-        kademlia(identity, seed);
+        kademlia(identity, seed ? seed : undefined);
+        promptMining(rl);
       });
 
     } else {
