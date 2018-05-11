@@ -74,9 +74,9 @@ class Blockchain {
         this.pendingTransactions = [];
 
         // Write to local .json file and make a broadcast POST to known peers
-        Cache.write(this.toString());
+        // Cache.write(this.toString());
 
-        this.broadcastBlockchain('https://fierce-oasis-50675.herokuapp.com/blockchain');
+        // this.broadcastBlockchain('https://fierce-oasis-50675.herokuapp.com/blockchain');
 
         clearInterval(miningInterval);
         this.currentlyMining = false;
@@ -161,7 +161,7 @@ class Blockchain {
         this.mineBlock();
       }
 
-    }, 5000);
+    }, 1000);
   }
 
   toString() {
