@@ -9,7 +9,7 @@ class RSA {
       fs.mkdirSync('./keys');
       exec('openssl genrsa -out ./keys/privkey.pem 1024', 'utf8', () => {
         exec('openssl rsa -in ./keys/privkey.pem -pubout > ./keys/pubkey.pub', 'utf8', () => {
-          resolve()
+          resolve();
         });
       })
     })

@@ -30,16 +30,19 @@ class Blockchain {
     genesisBlock.nonce = 0;
 
     this.chain.push(genesisBlock);
-
-    Cache.write(this.toString());
   }
   
   broadcastBlockchain(peerURL) {
-    const request = new XMLHttpRequest();
+    // Get list of peers
+    // Iterate over the list
+    // Send POST request to each one with our new block
 
-    request.open('POST', peerURL)
-    request.setRequestHeader('Content-Type', 'application/json')
-    request.send(JSON.stringify(this));
+
+    // const request = new XMLHttpRequest();
+
+    // request.open('POST', peerURL)
+    // request.setRequestHeader('Content-Type', 'application/json')
+    // request.send(JSON.stringify(this));
   }
 
   mineBlock() {
@@ -62,10 +65,8 @@ class Blockchain {
         this.chain.push(newBlock);
         this.pendingTransactions = [];
 
-        // Write to local .json file and make a broadcast POST to known peers
-        // Cache.write(this.toString());
-
-        // this.broadcastBlockchain('https://fierce-oasis-50675.herokuapp.com/blockchain');
+        // Write to local .json file
+        Cache.write(this.toString());
 
         clearInterval(miningInterval);
         this.currentlyMining = false;
