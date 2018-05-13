@@ -16,6 +16,8 @@ const CLI = require('./scripts/cli')
 // Clears the screen
 process.stdout.write('\033c');
 
+const REWARD_AMOUNT = 10;
+
 class Client {
   constructor(seed) {
     this.seed = seed;
@@ -47,7 +49,7 @@ class Client {
 
       // Checks validity of reward blocks, which has a null fromAddress
       let nullTransactions = transactions.select(transaction => { transaction.fromAddress === null })
-      if (nullTransactions.length !== 1 || nullTransactions[0].amount > 10) { return false }
+      if (nullTransactions.length !== 1 || nullTransactions[0].amount > REWARD_AMOUNT) { return false }
 
       // Checks validity of proof of work by comparing hashes to rehash of new block
       let newBlockHash = Blockchain.SHA(newBlock)
@@ -208,17 +210,13 @@ class Client {
   }
 }
 
-// let seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
-//   hostname: '167.99.180.30',
-//   port: 4000
-// }];
-
-let seed = ['9844f81e1408f6ecb932137d33bed70000000000', {
-  hostname: '192.168.0.104',
+let seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
+  hostname: '167.99.180.30',
   port: 4000
 }];
 
-const client = new Client()
+
+const client = new Client(seed)
 
 client.start()
 

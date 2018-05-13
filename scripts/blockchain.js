@@ -6,6 +6,8 @@ const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 const miningEventEmitter = require('./miningEvents')
 
+const REWARD_AMOUNT = 10;
+
 class Blockchain {
   constructor() {
     this.chain = [];
@@ -24,8 +26,8 @@ class Blockchain {
 
   createGenesisBlock() {
     const genesisBlock = new Block('0', null, [
-      new Transaction(null, 'Steven', 100),
       new Transaction(null, 'Branko', 100),
+      new Transaction('Branko', "Steven", 50)
     ]);
 
     genesisBlock.hash = this.SHA('hello world');
@@ -55,7 +57,7 @@ class Blockchain {
   }
 
   createRewardTransaction() {
-    return new Transaction(null, 'Branko', 10);
+    return new Transaction(null, 'Branko', REWARD_AMOUNT);
   }
 
   mineBlock() {
@@ -64,11 +66,7 @@ class Blockchain {
 
     let rewardTransaction = this.createRewardTransaction();
     let tempTransactions = this.pendingTransactions.slice();
-    tempTransactions.push(rewardTransaction)
-
-
-    // console.log('Reward: ', this.pendingTransactions.slice().push(rewardTransaction))
-    // console.log(this.pendingTransactions.slice().push(rewardTransaction))
+    tempTransactions.push(rewardTransaction);
 
     let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, tempTransactions);
     newBlock.nonce = 0;
@@ -92,8 +90,7 @@ class Blockchain {
 
         clearInterval(miningInterval);
         this.currentlyMining = false;
-        miningEventEmitter.emit('blockWasMined')
-
+        miningEventEmitter.emit('blockWasMined');
       }
     }, 0);
   }
