@@ -4,6 +4,8 @@ const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
+const miningEventEmitter = require('./miningEvents')
+
 class Blockchain {
   constructor() {
     this.chain = [];
@@ -32,24 +34,43 @@ class Blockchain {
     this.chain.push(genesisBlock);
   }
   
-  broadcastBlockchain(peerURL) {
+  broadcastBlockchain(peers) {
     // Get list of peers
     // Iterate over the list
     // Send POST request to each one with our new block
 
+    for (let peerURL of peers) {
+      const request = new XMLHttpRequest();
 
-    // const request = new XMLHttpRequest();
+      request.open('POST', "http://" + peerURL);
+      request.setRequestHeader('Content-Type', 'application/json')
 
-    // request.open('POST', peerURL)
-    // request.setRequestHeader('Content-Type', 'application/json')
-    // request.send(JSON.stringify(this));
+      request.addEventListener('load', () => {
+        console.log(request.status);
+        console.log(request.response);
+      })
+
+      request.send(JSON.stringify(this));
+    }
+  }
+
+  createRewardTransaction() {
+    return new Transaction(null, 'Branko', 10);
   }
 
   mineBlock() {
     console.log(`\n=====================\n==== Mining block #${this.chain.length}\n`);
     this.currentlyMining = true;
 
-    let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
+    let rewardTransaction = this.createRewardTransaction();
+    let tempTransactions = this.pendingTransactions.slice();
+    tempTransactions.push(rewardTransaction)
+
+
+    // console.log('Reward: ', this.pendingTransactions.slice().push(rewardTransaction))
+    // console.log(this.pendingTransactions.slice().push(rewardTransaction))
+
+    let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, tempTransactions);
     newBlock.nonce = 0;
 
     let miningInterval = setInterval(() => {
@@ -57,6 +78,7 @@ class Blockchain {
         newBlock.nonce++;
         if (newBlock.nonce % 100 === 0) { process.stdout.write('.') }
       } else {
+
         newBlock.hash = this.SHA(newBlock);
 
         process.stdout.write('\n\n~~~ Block Mined! ~~~\n\n')
@@ -70,6 +92,8 @@ class Blockchain {
 
         clearInterval(miningInterval);
         this.currentlyMining = false;
+        miningEventEmitter.emit('blockWasMined')
+
       }
     }, 0);
   }

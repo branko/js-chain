@@ -2,7 +2,7 @@ const readline = require('readline')
 
 class CLI {
   static puts(msg) {
-    console.log('===> ' + msg + "\n")
+    console.log('\n===> ' + msg + "\n")
   }
 
   static header(text) {

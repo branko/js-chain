@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const exec = require('child_process').exec;
 const SHA1 = require('crypto-js/sha1');
+const miningEventEmitter = require('./scripts/miningEvents')
 
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
@@ -12,6 +13,7 @@ const RSA = require('./rsa');
 const kademlia = require('./kademlia');
 const CLI = require('./scripts/cli')
 
+// Clears the screen
 process.stdout.write('\033c');
 
 class Client {
@@ -26,6 +28,10 @@ class Client {
       if (!fs.existsSync('./public')) { fs.mkdirSync('public') };
       exec('touch ./public/blockchain.json');
     }
+
+    miningEventEmitter.on('blockWasMined', () => {
+      this.blockchain.broadcastBlockchain(this.getPeers())
+    })
   }
 
   validateIncomingBlockchain(incoming, current) {
@@ -39,12 +45,15 @@ class Client {
         nonce,
       }
 
-      let newBlockHash = Blockchain.SHA(newBlock)
+      // Checks validity of reward blocks, which has a null fromAddress
+      let nullTransactions = transactions.select(transaction => { transaction.fromAddress === null })
+      if (nullTransactions.length !== 1 || nullTransactions[0].amount > 10) { return false }
 
-      if (newBlockHash !== block.hash) {
-        return false
-      };
+      // Checks validity of proof of work by comparing hashes to rehash of new block
+      let newBlockHash = Blockchain.SHA(newBlock)
+      if (newBlockHash !== block.hash) { return false };
     }
+
     return true
   }
 
@@ -79,8 +88,6 @@ class Client {
     });
   }
 
-
-
   promptMining() {
     const rl = this.readlineInterface();
 
@@ -98,6 +105,27 @@ class Client {
 
   keysExist() {
     return fs.existsSync('./keys/privkey.pem') && fs.existsSync('./keys/pubkey.pub');
+  }
+
+  getPeers() {
+    let peers = [];
+    let peerAddresses = [];
+
+    this.kademliaNode.router.forEach((bucket) => {
+      if (bucket.head) {
+        peers.push(bucket)
+      }
+    })
+
+    peers.forEach(bucket => {
+      if (bucket.head) {
+        bucket.forEach(peer => {
+          peerAddresses.push(peer.hostname + ':' + peer.port)
+        })
+      }
+    })
+
+    return peerAddresses;
   }
 
   start() {
@@ -126,6 +154,8 @@ class Client {
 
       // New blockchain
     app.post('/blockchain', (req, res) => {
+      console.log("INCOMING BLOCKCHAIN!");
+
       let incomingBlockchain = req.body;
       let currentBlockchain = JSON.parse(Cache.readJSON());
 
@@ -133,6 +163,7 @@ class Client {
         if (current.chain.length < incomingBlockchain.chain.length) {
           Cache.write(JSON.stringify(incomingBlockchain, null, 4));
         }
+        res.send('Thank you for your blockchain')
       } else {
         res.send('Invalid blockchain.')
       }
@@ -168,38 +199,26 @@ class Client {
       // This code outputs the number of closest peers to the seed node
 
       setInterval(() => {
-        // console.log(this.kademliaNode.router)
-        // console.log('# closest peers: ', this.kademliaNode.router.getClosestContactsToKey(this.identity, 20).size)
-        
-        let peers = [];
-        let peerAddresses = [];
-
-        this.kademliaNode.router.forEach((bucket) => {
-          if (bucket.head) {
-            peers.push(bucket)
-          }
-        })
-
-        peers.forEach(bucket => {
-          if (bucket.head) {
-            bucket.forEach(peer => {
-              peerAddresses.push(peer.hostname + ':' + peer.port)
-            })
-          }
-        })
-
-        console.log(peerAddresses)
+        let peers = this.getPeers();
+        console.log(`You have ${peers.length} peers`)
+        console.log("--> Current list of peers: " + peers.join(', '));
       }, 3000);
+
     })
   }
 }
 
-let seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
-  hostname: '167.99.180.30',
+// let seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
+//   hostname: '167.99.180.30',
+//   port: 4000
+// }];
+
+let seed = ['9844f81e1408f6ecb932137d33bed70000000000', {
+  hostname: '192.168.0.104',
   port: 4000
 }];
 
-const client = new Client(seed)
+const client = new Client()
 
 client.start()
 

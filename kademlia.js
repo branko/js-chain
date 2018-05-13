@@ -5,6 +5,7 @@ const encode = require('encoding-down');
 const ip = require("ip");
 const CLI = require('./scripts/cli');
 
+
 function startKademlia(identity, seed) {
   const node = new kadence.KademliaNode({
     identity: identity,
@@ -17,7 +18,7 @@ function startKademlia(identity, seed) {
   });
 
   node.once("join", function() {
-   CLI.puts(`connected to ${node.router.size} peers`);
+   CLI.puts(`Connection established! Now connected to ${node.router.size} peers`);
   });
 
   CLI.puts("Kadence node listening on port " + node.contact.port);
