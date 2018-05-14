@@ -179,15 +179,9 @@ class Client {
     })
   }
 
-  promptGetBalance() {
-
-  }
-
   keysExist() {
     return fs.existsSync('./keys/privkey.pem') && fs.existsSync('./keys/pubkey.pub');
   }
-
-
 
   getPeers() {
     let peers = [];
@@ -237,20 +231,20 @@ class Client {
       port: 3000,
       path: '/status',
     }
-   
+
     http.get(options, (resp) => {
       let data = '';
-     
+
       // A chunk of data has been recieved.
       resp.on('data', (chunk) => {
         data += chunk;
       });
-     
+
       // The whole response has been received. Print out the result.
       resp.on('end', () => {
         console.log(data);
       });
-     
+
     }).on("error", (err) => {
       console.log("Error: " + err.message);
     })
@@ -266,11 +260,39 @@ class Client {
   }
 
   pullPeers() {
+    this.peers.forEach(peer => {
+      const options = {
+        method: "GET",
+        url: "http://" + peer + ':3000' + "/peers",
+        port: 3000,
+      }
 
+      request(options, (err, res, body) => {
+        if (err) {
+          console.log(err)
+        }
+        console.log(body)
+      })
+    })
   }
 
   pushPeers() {
+    this.peers.forEach(peer => {
+      const options = {
+        method: "POST",
+        url: "http://" + peer + ':3000' + "/peers",
+        port: 3000,
+        json: this.peers,
+        headers: {'Content-Type': 'application/json'}
+      }
 
+      request(options, (err, res, body) => {
+        if (err) {
+          console.log(err)
+        }
+        console.log(body)
+      })
+    })
   }
 
   start() {
@@ -346,26 +368,23 @@ class Client {
 
     // GET peers -> Used to pull a list of peers from a node
     app.get('/peers', (req, res) => {
-      res.json(this.getPeers());
+      res.json(this.peers);
+    })
+
+    // POST peers -> Used to push a list of peers to a node
+    app.post('/peers', (req, res) => {
+      this.peers = _.union(this.peers, req.body);
+      res.send(`Thanks for the peers.`);
     })
 
     // POST connection => Used to establish connection with peer
-
     app.post('/connection', (req, res) => {
       console.log("Incoming!");
 
       this.peers.push(req.body.ip);
       console.log("New joiner: " + req.body.ip)
       console.log("Current peers: " + this.peers);
-
-      // this.peers.push(req.body);
       res.send(`IP ${req.body.ip} has joined the network`);
-    })
-
-    // POST peers -> Used to push a list of peers to a node
-    app.post('/peers', (req, res) => {
-      // req.body will include a peers JSON
-      // Will need to do a smart merge with our current peers
     })
 
     app.listen(process.env.PORT || 3000, () => {
@@ -382,7 +401,7 @@ class Client {
 
         if (checkArguments('--t')) {
           let answer = this.promptNewTransaction()
-        
+
           answer.then((answers) => {
             console.log("\nNew transaction:")
             console.log(`From: ${answers[0]}, To: ${answers[1]}, Amount: ${answers[2]}`)
@@ -425,5 +444,3 @@ if (checkArguments('--seed')) {
 
 
 client.start()
-
-
