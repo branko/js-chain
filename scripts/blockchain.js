@@ -13,7 +13,7 @@ class Blockchain {
   constructor() {
     this.chain = [];
     this.pendingTransactions = [];
-    this.difficulty = 5;
+    this.difficulty = 4;
     this.createGenesisBlock();
     eventEmitter.on('incomingBlock', () => {
       this.currentlyMining = false;
@@ -81,7 +81,7 @@ class Blockchain {
         newBlock.nonce++;
         if (!this.currentlyMining) {
           this.pendingTransactions = [];
-          return;
+          clearInterval(miningInterval);
         }
         if (newBlock.nonce % 100 === 0) { process.stdout.write('.') }
       } else {
