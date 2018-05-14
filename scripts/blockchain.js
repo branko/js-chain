@@ -3,9 +3,9 @@ const Cache = require('./cache');
 const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-const fs = require('fs')
+const fs = require('fs');
 
-const miningEventEmitter = require('./miningEvents')
+const eventEmitter = require('./miningEvents')
 
 const REWARD_AMOUNT = 10;
 
@@ -13,8 +13,10 @@ class Blockchain {
   constructor() {
     this.chain = [];
     this.pendingTransactions = [];
-    this.difficulty = 4;
+    this.difficulty = 3;
     this.createGenesisBlock();
+
+    
   }
 
   static SHA(str) {
@@ -41,12 +43,8 @@ class Blockchain {
       Cache.write(this)
     }
   }
-  
-  broadcastBlockchain(peers) {
-    // Get list of peers
-    // Iterate over the list
-    // Send POST request to each one with our new block
 
+  broadcastBlockchain(peers) {
     for (let peerURL of peers) {
       const request = new XMLHttpRequest();
 
@@ -66,6 +64,10 @@ class Blockchain {
     return new Transaction(null, 'Branko', REWARD_AMOUNT);
   }
 
+  stopMining() {
+    this.currentlyMining = false;
+  }
+
   mineBlock() {
     console.log(`\n=====================\n==== Mining block #${this.chain.length}\n`);
     this.currentlyMining = true;
@@ -80,9 +82,17 @@ class Blockchain {
     let miningInterval = setInterval(() => {
       if (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
         newBlock.nonce++;
+
+        if (!this.currentlyMining) {
+          console.log('\n\n\n\n\n\n')
+          console.log("Stopped mining...")
+
+          this.pendingTransactions = [];
+          clearInterval(miningInterval);
+        }
+
         if (newBlock.nonce % 100 === 0) { process.stdout.write('.') }
       } else {
-
         // Compare local blockchain in blockchain.json with in memory blockchain
         let localBlockchain = JSON.parse(Cache.readJSON())
 
@@ -106,7 +116,7 @@ class Blockchain {
 
         clearInterval(miningInterval);
         this.currentlyMining = false;
-        miningEventEmitter.emit('blockWasMined');
+        eventEmitter.emit('blockWasMined');
       }
     }, 0);
   }
@@ -185,10 +195,11 @@ class Blockchain {
       }
 
       if (!this.currentlyMining) {
+        console.log("\n\nFiring up the miner...\n\n")
         this.mineBlock();
       }
 
-    }, 1000);
+    }, 10000);
   }
 
   toString() {
