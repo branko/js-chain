@@ -185,32 +185,21 @@ class Blockchain {
   }
 
   beginMining() {
- 
-    // Dummy transaction
-    if (Math.random() > 0.5) {
-      this.createTransaction('Steven', 'Branko', Math.ceil(5 * Math.random()));
-    } else {
-      this.createTransaction('Branko', 'Steven', Math.ceil(5 * Math.random()));
-    }
+    const mine = setInterval(() => {
 
-    if (!this.currentlyMining) {
-      this.mineBlock();
-    }
+      // Dummy transaction
+      if (Math.random() > 0.5) {
+        this.createTransaction('Steven', 'Branko', Math.ceil(5 * Math.random()));
+      } else {
+        this.createTransaction('Branko', 'Steven', Math.ceil(5 * Math.random()));
+      }
 
-    // const mine = setInterval(() => {
+      if (!this.currentlyMining) {
+        console.log("\n\nFiring up the miner...\n\n")
+        this.mineBlock();
+      }
 
-    //   // Dummy transaction
-    //   if (Math.random() > 0.5) {
-    //     this.createTransaction('Steven', 'Branko', Math.ceil(5 * Math.random()));
-    //   } else {
-    //     this.createTransaction('Branko', 'Steven', Math.ceil(5 * Math.random()));
-    //   }
-
-    //   if (!this.currentlyMining) {
-    //     this.mineBlock();
-    //   }
-
-    // }, 1000);
+    }, 10000);
   }
 
   toString() {
