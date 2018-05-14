@@ -37,10 +37,10 @@ class Client {
   }
 
   validateIncomingBlockchain(incoming, current) {
-    for (block of incoming.chain) {
+    for (let block of incoming.chain) {
       let {timestamp, previousHash, transactions, nonce} = block;
 
-      newBlock = {
+      let newBlock = {
         timestamp,
         previousHash,
         transactions,
@@ -158,7 +158,11 @@ class Client {
     app.post('/blockchain', (req, res) => {
       console.log("INCOMING BLOCKCHAIN!");
 
-      let incomingBlockchain = req.body;
+      let incomingChain = JSON.parse(req.body).chain
+      let incomingBlockchain = new Blockchain;
+      
+      incomingBlockchain.chain = incomingChain
+
       let currentBlockchain = JSON.parse(Cache.readJSON());
 
       if (this.validateIncomingBlockchain(incomingBlockchain, currentBlockchain)) {
@@ -193,26 +197,25 @@ class Client {
         this.promptKeyGeneration();
       } else {
         // this.identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
-        this.identity = '9844f81e1408f6ecb932137d33bed70000000000'
+        this.identity = '9844f81e1408f6ecb932137d33bed70000000001'
         this.kademliaNode = kademlia(this.identity, this.seed);
         this.promptMining();
       }
 
       // This code outputs the number of closest peers to the seed node
 
-      setInterval(() => {
-        let peers = this.getPeers();
-        console.log(`You have ${peers.length} peers`)
-        console.log("--> Current list of peers: " + peers.join(', '));
-      }, 3000);
-
+      // setInterval(() => {
+      //   let peers = this.getPeers();
+      //   console.log(`You have ${peers.length} peers`)
+      //   console.log("--> Current list of peers: " + peers.join(', '));
+      // }, 3000);
     })
   }
 }
 
 let seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
   hostname: '167.99.180.30',
-  port: 4000
+  port: 3000
 }];
 
 

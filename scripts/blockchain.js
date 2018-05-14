@@ -44,7 +44,7 @@ class Blockchain {
     for (let peerURL of peers) {
       const request = new XMLHttpRequest();
 
-      request.open('POST', "http://" + peerURL);
+      request.open('POST', "http://" + peerURL + '/blockchain');
       request.setRequestHeader('Content-Type', 'application/json')
 
       request.addEventListener('load', () => {
