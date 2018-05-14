@@ -53,12 +53,13 @@ class Client {
   broadcastBlockchainToNetwork() {
     this.peers.forEach(peer => {
       console.log('Blockchain sent to ' + peer)
+
       const options = {
         method: "POST",
         url: "http://" + peer + ':3000' + "/blockchain",
         port: 3000,
-        headers: { 'Content-Type': 'application/json' }
-        json: JSON.stringify(this.blockchain),
+        headers: { 'Content-Type': 'application/json' },
+        json: this.blockchain.chain,
       }
 
       request(options, (err, res, body) => {
@@ -304,7 +305,7 @@ class Client {
     app.post('/blockchain', (req, res) => {
       console.log("INCOMING BLOCKCHAIN!");
 
-      let incomingChain = req.body.chain;
+      let incomingChain = req.body;
       let incomingBlockchain = new Blockchain;
 
       incomingBlockchain.chain = incomingChain
