@@ -39,6 +39,9 @@ class Client {
   validateIncomingBlockchain(incoming, current) {
     for (let block of incoming.chain) {
       let {timestamp, previousHash, transactions, nonce} = block;
+      
+      console.log("Transactions:")
+      console.log(transactions)
 
       let newBlock = {
         timestamp,
