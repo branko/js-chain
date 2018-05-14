@@ -8,6 +8,7 @@ const exec = require('child_process').exec;
 const SHA1 = require('crypto-js/sha1');
 const miningEventEmitter = require('./scripts/miningEvents')
 const ip = require("ip");
+const request = require('request');
 
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
@@ -189,30 +190,26 @@ class Client {
 
   joinNetwork() {
     this.peers.forEach(peer => {
+
+
+
       console.log(ip.address());
       const postData = ip.address()
 
       const options = {
         method: "POST",
-        hostname: peer,
+        url: "http://" + peer + ':3000' + "/connection",
         port: 3000,
-        path: '/connection',
+        body: ip.address(),
       }
 
-      let req = http.request(options, resp => {
-        console.log("Joined network??");
-        console.log(this.peers)
-        resp.on('end', () => {
-          console.log("Joined network")
-        })
-      })
+      request(options, (err, res, body) => {
+        if (err) {
+          console.log(err)
+        }
 
-      req.on('error', (e) => {
-        console.log("There was a problem ")
+        console.log(body)
       })
-
-      req.write(postData);
-      req.end();
     })
   }
 
@@ -338,16 +335,7 @@ class Client {
 
     app.post('/connection', (req, res) => {
       console.log("Incoming!");
-
-      let rawData = '';
-
-      res.on('data', (chunk) => {
-        rawData += chunk;
-      })
-      
-      res.on('end', () => {
-        console.log(rawData);
-      }
+      console.log(req.body)
 
       // this.peers.push(req.body);
       res.send(`IP ${req.body} has joined the network`);
