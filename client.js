@@ -189,7 +189,7 @@ class Client {
 
   joinNetwork() {
     this.peers.forEach(peer => {
-
+      console.log(ip.address());
       const postData = ip.address()
 
       const options = {
@@ -337,8 +337,8 @@ class Client {
     // POST connection => Used to establish connection with peer
 
     app.post('/connection', (req, res) => {
-      console.log(req.body);
-      this.peers.push(req.body);
+      console.log(req);
+      // this.peers.push(req.body);
       res.send(`IP ${req.body} has joined the network`);
     })
 
