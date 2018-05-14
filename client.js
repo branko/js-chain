@@ -180,9 +180,9 @@ class Client {
       let currentBlockchain = JSON.parse(Cache.readJSON());
 
       if (this.validateIncomingBlockchain(incomingBlockchain, currentBlockchain)) {
-        console.log("YAY! validated!")
-        if (current.chain.length < incomingBlockchain.chain.length) {
+        console.log("YAY! validated!");
 
+        if (currentBlockchain.chain.length < incomingBlockchain.chain.length) {
           Cache.write(JSON.stringify(incomingBlockchain, null, 4));
         }
         res.send('Thank you for your blockchain')
