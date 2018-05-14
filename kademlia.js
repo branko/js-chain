@@ -5,7 +5,6 @@ const encode = require('encoding-down');
 const ip = require("ip");
 const CLI = require('./scripts/cli');
 
-
 function startKademlia(identity, seed) {
   const node = new kadence.KademliaNode({
     identity: identity,
@@ -13,7 +12,7 @@ function startKademlia(identity, seed) {
     storage: levelup(encode(leveldown('./kademliaInfo'))),
     contact: {
       hostname: ip.address(),
-      port: 4000
+      port: 3000
     }
   });
 
