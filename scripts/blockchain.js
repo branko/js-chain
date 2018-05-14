@@ -15,7 +15,9 @@ class Blockchain {
     this.pendingTransactions = [];
     this.difficulty = 4;
     this.createGenesisBlock();
+
     eventEmitter.on('incomingBlock', () => {
+      console.log("INCOMING BLOCK EVENT TRIGGERED!")
       this.currentlyMining = false;
     })
   }
@@ -79,10 +81,14 @@ class Blockchain {
     let miningInterval = setInterval(() => {
       if (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
         newBlock.nonce++;
+
         if (!this.currentlyMining) {
+          process.stdout.write('\033c');
+          console.log("Stopped mining...")
           this.pendingTransactions = [];
           clearInterval(miningInterval);
         }
+
         if (newBlock.nonce % 100 === 0) { process.stdout.write('.') }
       } else {
         // Compare local blockchain in blockchain.json with in memory blockchain
