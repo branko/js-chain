@@ -13,7 +13,7 @@ class Blockchain {
   constructor() {
     this.chain = [];
     this.pendingTransactions = [];
-    this.difficulty = 4;
+    this.difficulty = 3;
     this.createGenesisBlock();
 
     
@@ -185,20 +185,32 @@ class Blockchain {
   }
 
   beginMining() {
-    const mine = setInterval(() => {
+ 
+    // Dummy transaction
+    if (Math.random() > 0.5) {
+      this.createTransaction('Steven', 'Branko', Math.ceil(5 * Math.random()));
+    } else {
+      this.createTransaction('Branko', 'Steven', Math.ceil(5 * Math.random()));
+    }
 
-      // Dummy transaction
-      if (Math.random() > 0.5) {
-        this.createTransaction('Steven', 'Branko', Math.ceil(5 * Math.random()));
-      } else {
-        this.createTransaction('Branko', 'Steven', Math.ceil(5 * Math.random()));
-      }
+    if (!this.currentlyMining) {
+      this.mineBlock();
+    }
 
-      if (!this.currentlyMining) {
-        this.mineBlock();
-      }
+    // const mine = setInterval(() => {
 
-    }, 1000);
+    //   // Dummy transaction
+    //   if (Math.random() > 0.5) {
+    //     this.createTransaction('Steven', 'Branko', Math.ceil(5 * Math.random()));
+    //   } else {
+    //     this.createTransaction('Branko', 'Steven', Math.ceil(5 * Math.random()));
+    //   }
+
+    //   if (!this.currentlyMining) {
+    //     this.mineBlock();
+    //   }
+
+    // }, 1000);
   }
 
   toString() {
