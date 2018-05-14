@@ -220,11 +220,11 @@ class Client {
 
       // This code outputs the number of closest peers to the seed node
 
-      // setInterval(() => {
-      //   let peers = this.getPeers();
-      //   console.log(`You have ${peers.length} peers`)
-      //   console.log("--> Current list of peers: " + peers.join(', '));
-      // }, 3000);
+      setInterval(() => {
+        let peers = this.getPeers();
+        console.log(`You have ${peers.length} peers`)
+        console.log("--> Current list of peers: " + peers.join(', '));
+      }, 3000);
     })
   }
 }
