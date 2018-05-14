@@ -47,6 +47,8 @@ class Client {
         nonce,
       }
 
+      newBlock.hash = Blockchain.SHA(newBlock)
+
       // Checks validity of reward blocks, which has a null fromAddress
       if (transactions.some(t => t.fromAddress === null)) {
         let nullTransactions = transactions.filter(transaction => { transaction.fromAddress === null })
