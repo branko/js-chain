@@ -45,7 +45,29 @@ class Client {
     }
 
     miningEventEmitter.on('blockWasMined', () => {
-      this.blockchain.broadcastBlockchain(this.getPeers())
+      this.blockchain.broadcastBlockchain(this.getPeers());
+      this.broadcastBlockchainToNetwork();
+    })
+  }
+
+  broadcastBlockchainToNetwork() {
+    this.peers.forEach(peer => {
+      console.log('Blockchain sent to ' + peer)
+      const options = {
+        method: "POST",
+        url: "http://" + peer + ':3000' + "/blockchain",
+        port: 3000,
+        headers: { 'Content-Type': 'application/json' }
+        json: JSON.stringify(this.blockchain),
+      }
+
+      request(options, (err, res, body) => {
+        if (err) {
+          console.log(err)
+        }
+
+        console.log(body)
+      })
     })
   }
 
