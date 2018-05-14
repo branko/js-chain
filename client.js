@@ -199,7 +199,9 @@ class Client {
         path: '/connection',
       }
 
-      req = http.request(options, resp => {
+      let req = http.request(options, resp => {
+        console.log("Joined network??");
+        console.log(this.peers)
         resp.on('end', () => {
           console.log("Joined network")
         })
@@ -257,6 +259,7 @@ class Client {
   }
 
   start() {
+    this.joinNetwork();
     this.pingAll();
 
     app.use(bodyParser.urlencoded())
