@@ -31,7 +31,7 @@ class Blockchain {
     ]);
 
     genesisBlock.nonce = 0;
-    
+
     genesisBlock.hash = this.SHA(genesisBlock);
 
     this.chain.push(genesisBlock);
@@ -77,6 +77,14 @@ class Blockchain {
         newBlock.nonce++;
         if (newBlock.nonce % 100 === 0) { process.stdout.write('.') }
       } else {
+        // Compare local blockchain in blockchain.json with in memory blockchain
+        let localBlockhain = JSON.parse(Cache.readJSON())
+
+        if (localBlockchain.chain.length > this.chain.length) {
+          this.chain = localBlockchain.chain;
+          this.pendingTransactions = [];
+          return;
+        }
 
         newBlock.hash = this.SHA(newBlock);
 
@@ -87,6 +95,7 @@ class Blockchain {
         this.pendingTransactions = [];
 
         // Write to local .json file
+
         Cache.write(this.toString());
 
         clearInterval(miningInterval);
