@@ -190,17 +190,13 @@ class Client {
 
   joinNetwork() {
     this.peers.forEach(peer => {
-
-
-
       console.log(ip.address());
-      const postData = ip.address()
 
       const options = {
         method: "POST",
         url: "http://" + peer + ':3000' + "/connection",
         port: 3000,
-        body: ip.address(),
+        form: { ip: ip.address() },
       }
 
       request(options, (err, res, body) => {
@@ -335,10 +331,11 @@ class Client {
 
     app.post('/connection', (req, res) => {
       console.log("Incoming!");
-      console.log(req.body)
+
+      this.peers.push(res.body.ip);
 
       // this.peers.push(req.body);
-      res.send(`IP ${req.body} has joined the network`);
+      res.send(`IP ${req.body.ip} has joined the network`);
     })
 
     // POST peers -> Used to push a list of peers to a node
