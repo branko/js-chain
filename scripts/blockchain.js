@@ -83,7 +83,7 @@ class Blockchain {
         newBlock.nonce++;
 
         if (!this.currentlyMining) {
-          process.stdout.write('\033c');
+          console.log('\n\n\n\n\n\n')
           console.log("Stopped mining...")
           this.pendingTransactions = [];
           clearInterval(miningInterval);
