@@ -211,7 +211,7 @@ class Client {
         console.log("There was a problem ")
       })
 
-      req.write(postData)
+      req.write(postData);
       req.end();
     })
   }
@@ -337,7 +337,18 @@ class Client {
     // POST connection => Used to establish connection with peer
 
     app.post('/connection', (req, res) => {
-      console.log(req);
+      console.log("Incoming!");
+
+      let rawData = '';
+
+      res.on('data', (chunk) => {
+        rawData += chunk;
+      })
+      
+      res.on('end', () => {
+        console.log(rawData);
+      }
+
       // this.peers.push(req.body);
       res.send(`IP ${req.body} has joined the network`);
     })
