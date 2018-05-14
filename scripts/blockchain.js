@@ -16,10 +16,7 @@ class Blockchain {
     this.difficulty = 4;
     this.createGenesisBlock();
 
-    eventEmitter.on('incomingBlock', () => {
-      console.log("INCOMING BLOCK EVENT TRIGGERED!")
-      this.currentlyMining = false;
-    })
+    
   }
 
   static SHA(str) {
@@ -65,6 +62,10 @@ class Blockchain {
 
   createRewardTransaction() {
     return new Transaction(null, 'Branko', REWARD_AMOUNT);
+  }
+
+  stopMining() {
+    this.currentlyMining = false;
   }
 
   mineBlock() {
