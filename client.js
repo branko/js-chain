@@ -49,7 +49,8 @@ class Client {
 
       // Checks validity of reward blocks, which has a null fromAddress
       let nullTransactions = transactions.filter(transaction => { transaction.fromAddress === null })
-      if (nullTransactions.length !== 1 || nullTransactions[0].amount > REWARD_AMOUNT) {
+
+      if (nullTransactions.length > 1 || nullTransactions[0].amount > REWARD_AMOUNT) {
         console.log("One of your null transactions is invalid")
         return false
       }
