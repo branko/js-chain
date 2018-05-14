@@ -3,6 +3,11 @@ const Cache = require('./cache');
 const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+const fs = require('fs')
+
+const miningEventEmitter = require('./miningEvents')
+
+const REWARD_AMOUNT = 10;
 
 class Blockchain {
   constructor() {
@@ -22,31 +27,54 @@ class Blockchain {
 
   createGenesisBlock() {
     const genesisBlock = new Block('0', null, [
-      new Transaction(null, 'Steven', 100),
       new Transaction(null, 'Branko', 100),
+      new Transaction('Branko', "Steven", 50)
     ]);
 
-    genesisBlock.hash = this.SHA('hello world');
     genesisBlock.nonce = 0;
+
+    genesisBlock.hash = this.SHA(genesisBlock);
 
     this.chain.push(genesisBlock);
 
-    Cache.write(this.toString());
+    if (!fs.existsSync('./public/blockchain.json')) {
+      Cache.write(this)
+    }
   }
   
-  broadcastBlockchain(peerURL) {
-    const request = new XMLHttpRequest();
+  broadcastBlockchain(peers) {
+    // Get list of peers
+    // Iterate over the list
+    // Send POST request to each one with our new block
 
-    request.open('POST', peerURL)
-    request.setRequestHeader('Content-Type', 'application/json')
-    request.send(JSON.stringify(this));
+    for (let peerURL of peers) {
+      const request = new XMLHttpRequest();
+
+      request.open('POST', "http://" + peerURL + '/blockchain');
+      request.setRequestHeader('Content-Type', 'application/json')
+
+      request.addEventListener('load', () => {
+        console.log(request.status);
+        console.log(request.response);
+      })
+
+      request.send(JSON.stringify(this));
+    }
+  }
+
+  createRewardTransaction() {
+    return new Transaction(null, 'Branko', REWARD_AMOUNT);
   }
 
   mineBlock() {
     console.log(`\n=====================\n==== Mining block #${this.chain.length}\n`);
     this.currentlyMining = true;
 
-    let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, this.pendingTransactions);
+    let rewardTransaction = this.createRewardTransaction();
+    let tempTransactions = this.pendingTransactions.slice();
+    tempTransactions.push(rewardTransaction);
+
+    let newBlock = new Block(Date.now(), this.chain[this.chain.length - 1].hash, tempTransactions);
     newBlock.nonce = 0;
 
     let miningInterval = setInterval(() => {
@@ -54,6 +82,16 @@ class Blockchain {
         newBlock.nonce++;
         if (newBlock.nonce % 100 === 0) { process.stdout.write('.') }
       } else {
+
+        // Compare local blockchain in blockchain.json with in memory blockchain
+        let localBlockchain = JSON.parse(Cache.readJSON())
+
+        if (localBlockchain.chain.length > this.chain.length) {
+          this.chain = localBlockchain.chain;
+          this.pendingTransactions = [];
+          return;
+        }
+
         newBlock.hash = this.SHA(newBlock);
 
         process.stdout.write('\n\n~~~ Block Mined! ~~~\n\n')
@@ -62,13 +100,13 @@ class Blockchain {
         this.chain.push(newBlock);
         this.pendingTransactions = [];
 
-        // Write to local .json file and make a broadcast POST to known peers
-        // Cache.write(this.toString());
+        // Write to local .json file
 
-        // this.broadcastBlockchain('https://fierce-oasis-50675.herokuapp.com/blockchain');
+        Cache.write(this.toString());
 
         clearInterval(miningInterval);
         this.currentlyMining = false;
+        miningEventEmitter.emit('blockWasMined');
       }
     }, 0);
   }

@@ -3,7 +3,12 @@ const fs = require('fs');
 class Cache {
   static write(blockchain) {
     // if JSON doesnt exist, create one
-    fs.writeFileSync("public/blockchain.json", blockchain);
+    fs.writeFile("public/blockchain.json", blockchain, (err) => {
+      if (err) {
+        console.log(err)
+      }
+      console.log("Blockchain written to file")
+    });
   }
 
   static read() {

@@ -6,13 +6,13 @@ Created by Steven Shen and Branko Culum
 # Todos:
 ## Short term
 
-- `Cache.readJSON` is redundant, but read must return a parsed object, code might break elsewhere
-- **Migrate to Diglet instead of ngrok (Thursday)**
-  - https://github.com/bookchin/diglet
-- Add timestamps to transactions and hash transactionID
-  - Also add timestamps to wallet#show in exchange
+
+- Implement PeerNode class to keep track of peer addressed and routing requests related to it
+  - get /peers
+  - post /peers
+  - post /ping
+
 - Style exchange using bootstrap
-- Implement rewards for miners
 - Optimize blockchain.json size => Maybe don't mind blocks without transactions?
 - Each node should track IPs of peers
   - Periodically send out pings to test for connection

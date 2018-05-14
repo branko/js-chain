@@ -3,34 +3,37 @@ const levelup = require('levelup');
 const leveldown = require('leveldown');
 const encode = require('encoding-down');
 const ip = require("ip");
+const CLI = require('./scripts/cli');
 
 function startKademlia(identity, seed) {
-  const kademliaNode = new kadence.KademliaNode({
+  const node = new kadence.KademliaNode({
     identity: identity,
     transport: new kadence.HTTPTransport(),
     storage: levelup(encode(leveldown('./kademliaInfo'))),
     contact: {
       hostname: ip.address(),
-      port: 4000
+      port: 3000
     }
   });
 
-  kademliaNode.once("join", function() {
-   console.info(`connected to ${kademliaNode.router.size} peers`);
+  node.once("join", function() {
+   CLI.puts(`Connection established! Now connected to ${node.router.size} peers`);
   });
 
-  console.log("Listening on port " + kademliaNode.contact.port);
-  kademliaNode.listen(kademliaNode.contact.port);
+  CLI.puts("Kadence node listening on port " + node.contact.port);
+  node.listen(node.contact.port);
 
-  kademliaNode.once("error", function(err) {
-   console.error("failed to join the network", err);
+  node.once("error", function(err) {
+   CLI.puts("failed to join the network", err);
   });
 
   if (seed) {
-    kademliaNode.join(seed);
+    node.join(seed);
   } else {
-    console.log('No seed found');
+    CLI.puts('No seed found, you must be the first node!');
   }
+
+  return node;
 }
 
 module.exports = startKademlia;
