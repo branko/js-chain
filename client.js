@@ -48,12 +48,16 @@ class Client {
       }
 
       // Checks validity of reward blocks, which has a null fromAddress
-      let nullTransactions = transactions.filter(transaction => { transaction.fromAddress === null })
+      if (transactions.some(t => t.fromAddress === null)) {
+        let nullTransactions = transactions.filter(transaction => { transaction.fromAddress === null })
 
-      if (nullTransactions.length > 1 || nullTransactions[0].amount > REWARD_AMOUNT) {
-        console.log("One of your null transactions is invalid")
-        return false
+        if (nullTransactions.length > 1 || nullTransactions[0].amount > REWARD_AMOUNT) {
+          console.log("One of your null transactions is invalid")
+          return false
+        }
       }
+
+      
 
       // Checks validity of proof of work by comparing hashes to rehash of new block
       let newBlockHash = Blockchain.SHA(newBlock)
