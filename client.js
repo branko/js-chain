@@ -205,7 +205,7 @@ class Client {
         })
       })
 
-      req.on('error', (e) {
+      req.on('error', (e) => {
         console.log("There was a problem ")
       })
 
@@ -394,7 +394,7 @@ if (checkArguments('--seed')) {
   //   port: 3000
   // }];
 
-  let seed = "167.99.180.30";
+  let seed = "138.197.158.101";
 
   client = new Client(seed);
 } else {
