@@ -3,6 +3,7 @@ const Cache = require('./cache');
 const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+const fs = require('fs')
 
 const miningEventEmitter = require('./miningEvents')
 
@@ -35,6 +36,10 @@ class Blockchain {
     genesisBlock.hash = this.SHA(genesisBlock);
 
     this.chain.push(genesisBlock);
+
+    if (!fs.existsSync('./public/blockchain.json')) {
+      Cache.write(this)
+    }
   }
   
   broadcastBlockchain(peers) {
@@ -77,6 +82,7 @@ class Blockchain {
         newBlock.nonce++;
         if (newBlock.nonce % 100 === 0) { process.stdout.write('.') }
       } else {
+
         // Compare local blockchain in blockchain.json with in memory blockchain
         let localBlockchain = JSON.parse(Cache.readJSON())
 
