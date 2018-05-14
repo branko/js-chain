@@ -39,7 +39,7 @@ class Client {
   validateIncomingBlockchain(incoming, current) {
     for (let block of incoming.chain) {
       let {timestamp, previousHash, transactions, nonce} = block;
-      
+
       console.log("Transactions:")
       console.log(transactions)
 
@@ -51,7 +51,7 @@ class Client {
       }
 
       // Checks validity of reward blocks, which has a null fromAddress
-      let nullTransactions = transactions.select(transaction => { transaction.fromAddress === null })
+      let nullTransactions = transactions.filter(transaction => { transaction.fromAddress === null })
       if (nullTransactions.length !== 1 || nullTransactions[0].amount > REWARD_AMOUNT) { return false }
 
       // Checks validity of proof of work by comparing hashes to rehash of new block
