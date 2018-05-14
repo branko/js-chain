@@ -158,9 +158,9 @@ class Client {
     app.post('/blockchain', (req, res) => {
       console.log("INCOMING BLOCKCHAIN!");
 
-      let incomingChain = JSON.parse(req.body).chain
+      let incomingChain = req.body.chain;
       let incomingBlockchain = new Blockchain;
-      
+
       incomingBlockchain.chain = incomingChain
 
       let currentBlockchain = JSON.parse(Cache.readJSON());
