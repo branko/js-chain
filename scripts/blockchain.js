@@ -3,9 +3,9 @@ const Cache = require('./cache');
 const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-const fs = require('fs')
+const fs = require('fs');
 
-const miningEventEmitter = require('./miningEvents')
+const eventEmitter = require('./miningEvents')
 
 const REWARD_AMOUNT = 10;
 
@@ -13,8 +13,11 @@ class Blockchain {
   constructor() {
     this.chain = [];
     this.pendingTransactions = [];
-    this.difficulty = 4;
+    this.difficulty = 5;
     this.createGenesisBlock();
+    eventEmitter.on('incomingBlock', () => {
+      this.currentlyMining = false;
+    })
   }
 
   static SHA(str) {
@@ -41,12 +44,8 @@ class Blockchain {
       Cache.write(this)
     }
   }
-  
-  broadcastBlockchain(peers) {
-    // Get list of peers
-    // Iterate over the list
-    // Send POST request to each one with our new block
 
+  broadcastBlockchain(peers) {
     for (let peerURL of peers) {
       const request = new XMLHttpRequest();
 
@@ -80,9 +79,12 @@ class Blockchain {
     let miningInterval = setInterval(() => {
       if (this.SHA(newBlock).slice(0, this.difficulty) !== Array(this.difficulty + 1).join('0')) {
         newBlock.nonce++;
+        if (!this.currentlyMining) {
+          this.pendingTransactions = [];
+          return;
+        }
         if (newBlock.nonce % 100 === 0) { process.stdout.write('.') }
       } else {
-
         // Compare local blockchain in blockchain.json with in memory blockchain
         let localBlockchain = JSON.parse(Cache.readJSON())
 
@@ -106,7 +108,7 @@ class Blockchain {
 
         clearInterval(miningInterval);
         this.currentlyMining = false;
-        miningEventEmitter.emit('blockWasMined');
+        eventEmitter.emit('blockWasMined');
       }
     }, 0);
   }

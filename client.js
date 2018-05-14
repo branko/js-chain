@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const exec = require('child_process').exec;
 const SHA1 = require('crypto-js/sha1');
-const miningEventEmitter = require('./scripts/miningEvents')
+const eventEmitter = require('./scripts/miningEvents');
 const ip = require("ip");
 const request = require('request');
 const _ = require('underscore')
@@ -45,7 +45,7 @@ class Client {
       exec('touch ./public/blockchain.json');
     }
 
-    miningEventEmitter.on('blockWasMined', () => {
+    eventEmitter.on('blockWasMined', () => {
       this.blockchain.broadcastBlockchain(this.getPeers());
       this.broadcastBlockchainToNetwork();
     })
@@ -334,8 +334,7 @@ class Client {
       let currentBlockchain = JSON.parse(Cache.readJSON());
 
       if (this.validateIncomingBlockchain(incomingBlockchain, currentBlockchain)) {
-        console.log("YAY! validated!");
-
+        eventEmitter.emit('incomingBlock');
         if (currentBlockchain.chain.length < incomingBlockchain.chain.length) {
           Cache.write(JSON.stringify(incomingBlockchain, null, 4));
         }
