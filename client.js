@@ -335,9 +335,12 @@ class Client {
 
       if (this.validateIncomingBlockchain(incomingBlockchain, currentBlockchain)) {
         eventEmitter.emit('incomingBlock');
+        
         if (currentBlockchain.chain.length < incomingBlockchain.chain.length) {
           Cache.write(JSON.stringify(incomingBlockchain, null, 4));
+          this.blockchain = incomingBlockchain;
         }
+
         res.send('Thank you for your blockchain')
       } else {
         res.send('Invalid blockchain.')
