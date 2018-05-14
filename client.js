@@ -276,7 +276,7 @@ class Client {
     })
   }
 
-  pushPeers() {
+  pushPeersToNetwork() {
     this.peers.forEach(peer => {
       const options = {
         method: "POST",
@@ -385,6 +385,7 @@ class Client {
       console.log("New joiner: " + req.body.ip)
       console.log("Current peers: " + this.peers);
       res.send(`IP ${req.body.ip} has joined the network`);
+      this.pushPeersToNetwork();
     })
 
     app.listen(process.env.PORT || 3000, () => {
@@ -435,7 +436,9 @@ if (checkArguments('--seed')) {
   //   port: 3000
   // }];
 
-  let seed = "138.197.158.101";
+// Steven's droplet: 167.99.180.30
+// Branko's droplet: 138.197.158.101
+  let seed = "167.99.180.30";
 
   client = new Client(seed);
 } else {
