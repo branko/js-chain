@@ -60,8 +60,7 @@ class Client {
       }
 
       // Checks validity of proof of work by comparing hashes to rehash of new block
-      let newBlockHash = Blockchain.SHA(newBlock)
-      if (newBlockHash !== block.hash) {
+      if (newBlock.hash !== block.hash) {
         console.log("One of your blockchain hashes is invalid")
 
         return false;
