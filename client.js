@@ -338,6 +338,7 @@ class Client {
         if (currentBlockchain.chain.length < incomingBlockchain.chain.length) {
           Cache.write(JSON.stringify(incomingBlockchain, null, 4));
           this.blockchain = incomingBlockchain;
+          this.blockchain.currentlyMining = false;
         }
 
         res.send('Thank you for your blockchain')
