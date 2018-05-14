@@ -7,7 +7,6 @@ class Cache {
       if (err) {
         console.log(err)
       }
-      console.log("Blockchain written to file")
     });
   }
 

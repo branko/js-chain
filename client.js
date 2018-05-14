@@ -1,3 +1,4 @@
+const http = require('http');
 const express = require('express');
 const app = express();
 const readline = require('readline');
@@ -6,21 +7,34 @@ const fs = require('fs');
 const exec = require('child_process').exec;
 const SHA1 = require('crypto-js/sha1');
 const miningEventEmitter = require('./scripts/miningEvents')
+const ip = require("ip");
+const request = require('request');
+const _ = require('underscore')
 
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
 const RSA = require('./rsa');
-const kademlia = require('./kademlia');
-const CLI = require('./scripts/cli')
+// const kademlia = require('./kademlia');
+const CLI = require('./scripts/cli');
 
 // Clears the screen
 process.stdout.write('\033c');
+
+function checkArguments(arg) {
+  return process.argv.includes(arg)
+}
 
 const REWARD_AMOUNT = 10;
 
 class Client {
   constructor(seed) {
-    this.seed = seed;
+    this.peers = [];
+
+    if (seed) {
+      this.seed = seed;
+      this.peers.push(seed)
+    }
+
     this.blockchain = new Blockchain();
 
     if (fs.existsSync('./public/blockchain.json')) {
@@ -32,7 +46,31 @@ class Client {
     }
 
     miningEventEmitter.on('blockWasMined', () => {
-      this.blockchain.broadcastBlockchain(this.getPeers())
+      this.blockchain.broadcastBlockchain(this.getPeers());
+      this.broadcastBlockchainToNetwork();
+    })
+  }
+
+  broadcastBlockchainToNetwork() {
+    this.peers.forEach(peer => {
+      console.log('Blockchain sent to ' + peer)
+
+      const options = {
+        method: "POST",
+        url: "http://" + peer + ':3000' + "/blockchain",
+        port: 3000,
+        headers: { 'Content-Type': 'application/json' },
+        json: this.blockchain.chain,
+      }
+
+      request(options, (err, res, body) => {
+        if (err) {
+          this.peers = _(this.peers).without(peer)
+          console.log(`Kicked ${peer} off the network because it is non-responsive`)
+        }
+
+        console.log(body)
+      })
     })
   }
 
@@ -60,9 +98,6 @@ class Client {
       }
 
       // Checks validity of proof of work by comparing hashes to rehash of new block
-      console.log(newBlock.hash)
-      console.log(block.hash)
-
       if (newBlock.hash !== block.hash) {
         console.log("One of your blockchain hashes is invalid")
 
@@ -89,7 +124,7 @@ class Client {
 
         RSA.generateKeys().then((val) => {
           let identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
-          this.kademliaNode = kademlia(identity, this.seed ? this.seed : undefined);
+          // this.kademliaNode = kademlia(identity, this.seed ? this.seed : undefined);
 
           this.promptMining();
         });
@@ -119,19 +154,50 @@ class Client {
     });
   }
 
+  promptNewTransaction() {
+    const rl = this.readlineInterface();
+
+    return new Promise((resolve, reject) => {
+      rl.question('\n\nWould you like to make a new transaction? [y/n]\n\n', (answer) => {
+        if (answer === 'y') {
+          rl.question('\n\nWhat is the "to" address?\n\n', (fromAnswer) => {
+            // Validate fromAnswer here
+            rl.question('\n\nWhat is the "from" address?\n\n', (toAnswer) => {
+              // Validate toAnswer here
+              rl.question('\n\nWhat is the amount?\n\n', (amountAnswer) => {
+                // Validate amountAnswer here
+                rl.close()
+                resolve([fromAnswer, toAnswer, amountAnswer])
+              })
+            })
+          })
+        } else {
+          rl.close()
+          reject(answer)
+        }
+      })
+    })
+  }
+
+  promptGetBalance() {
+
+  }
+
   keysExist() {
     return fs.existsSync('./keys/privkey.pem') && fs.existsSync('./keys/pubkey.pub');
   }
+
+
 
   getPeers() {
     let peers = [];
     let peerAddresses = [];
 
-    this.kademliaNode.router.forEach((bucket) => {
-      if (bucket.head) {
-        peers.push(bucket)
-      }
-    })
+    // this.kademliaNode.router.forEach((bucket) => {
+    //   if (bucket.head) {
+    //     peers.push(bucket)
+    //   }
+    // })
 
     peers.forEach(bucket => {
       if (bucket.head) {
@@ -144,7 +210,73 @@ class Client {
     return peerAddresses;
   }
 
+  joinNetwork() {
+    this.peers.forEach(peer => {
+      console.log(ip.address());
+
+      const options = {
+        method: "POST",
+        url: "http://" + peer + ':3000' + "/connection",
+        port: 3000,
+        form: { ip: ip.address() },
+      }
+
+      request(options, (err, res, body) => {
+        if (err) {
+          console.log(err)
+        }
+
+        console.log(body)
+      })
+    })
+  }
+
+  ping(peer) {
+    const options = {
+      hostname: peer,
+      port: 3000,
+      path: '/status',
+    }
+   
+    http.get(options, (resp) => {
+      let data = '';
+     
+      // A chunk of data has been recieved.
+      resp.on('data', (chunk) => {
+        data += chunk;
+      });
+     
+      // The whole response has been received. Print out the result.
+      resp.on('end', () => {
+        console.log(data);
+      });
+     
+    }).on("error", (err) => {
+      console.log("Error: " + err.message);
+    })
+  }
+
+  pingAll() {
+    console.log("Trying to ping all")
+    // Iterate over all peers and ping them
+
+    this.peers.forEach(peer => {
+      this.ping(peer);
+    })
+  }
+
+  pullPeers() {
+
+  }
+
+  pushPeers() {
+
+  }
+
   start() {
+    this.joinNetwork();
+    this.pingAll();
+
     app.use(bodyParser.urlencoded())
     app.use(bodyParser.json()) // Gives us access to body-parser
 
@@ -172,7 +304,7 @@ class Client {
     app.post('/blockchain', (req, res) => {
       console.log("INCOMING BLOCKCHAIN!");
 
-      let incomingChain = req.body.chain;
+      let incomingChain = req.body;
       let incomingBlockchain = new Blockchain;
 
       incomingBlockchain.chain = incomingChain
@@ -205,6 +337,37 @@ class Client {
       }
     })
 
+    // Peer communication routes
+
+    // GET status -> Used to ping peers for activity
+    app.get('/status', (req, res) => {
+      res.send("I'm currently active");
+    })
+
+    // GET peers -> Used to pull a list of peers from a node
+    app.get('/peers', (req, res) => {
+      res.json(this.getPeers());
+    })
+
+    // POST connection => Used to establish connection with peer
+
+    app.post('/connection', (req, res) => {
+      console.log("Incoming!");
+
+      this.peers.push(req.body.ip);
+      console.log("New joiner: " + req.body.ip)
+      console.log("Current peers: " + this.peers);
+
+      // this.peers.push(req.body);
+      res.send(`IP ${req.body.ip} has joined the network`);
+    })
+
+    // POST peers -> Used to push a list of peers to a node
+    app.post('/peers', (req, res) => {
+      // req.body will include a peers JSON
+      // Will need to do a smart merge with our current peers
+    })
+
     app.listen(process.env.PORT || 3000, () => {
       CLI.header("Welcome to js-chain")
       CLI.puts('Client is now listening on port 3000!')
@@ -212,30 +375,54 @@ class Client {
       if (!this.keysExist()) {
         this.promptKeyGeneration();
       } else {
-        // this.identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
-        this.identity = '9844f81e1408f6ecb932137d33bed70000000001'
-        this.kademliaNode = kademlia(this.identity, this.seed);
-        this.promptMining();
+        this.identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
+        CLI.puts(`Your public key: ${this.identity}`)
+
+        // this.kademliaNode = kademlia(this.identity, this.seed);
+
+        if (checkArguments('--t')) {
+          let answer = this.promptNewTransaction()
+        
+          answer.then((answers) => {
+            console.log("\nNew transaction:")
+            console.log(`From: ${answers[0]}, To: ${answers[1]}, Amount: ${answers[2]}`)
+            this.promptMining();
+          }).catch((answer) => {
+            console.log('Your answer was ' + answer)
+          })
+
+        } else {
+          this.promptMining();
+        }
       }
 
       // This code outputs the number of closest peers to the seed node
 
-      setInterval(() => {
-        let peers = this.getPeers();
-        console.log(`You have ${peers.length} peers`)
-        console.log("--> Current list of peers: " + peers.join(', '));
-      }, 3000);
+      if (checkArguments('--log')) {
+        setInterval(() => {
+          CLI.puts(`You have ${this.peers.length} peers`)
+          CLI.puts("--> Current list of peers: " + this.peers.join(', '));
+        }, 3000);
+      }
     })
   }
 }
 
-let seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
-  hostname: '167.99.180.30',
-  port: 3000
-}];
+let client;
 
+if (checkArguments('--seed')) {
+  // let seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
+  //   hostname: '167.99.180.30',
+  //   port: 3000
+  // }];
 
-const client = new Client(seed)
+  let seed = "138.197.158.101";
+
+  client = new Client(seed);
+} else {
+  client = new Client();
+}
+
 
 client.start()
 
