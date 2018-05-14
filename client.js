@@ -7,6 +7,7 @@ const fs = require('fs');
 const exec = require('child_process').exec;
 const SHA1 = require('crypto-js/sha1');
 const miningEventEmitter = require('./scripts/miningEvents')
+const ip = require("ip");
 
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
@@ -25,7 +26,7 @@ const REWARD_AMOUNT = 10;
 
 class Client {
   constructor(seed) {
-    this.peers = ['138.197.158.101'];
+    this.peers = [];
 
     if (seed) {
       this.seed = seed;
@@ -163,6 +164,8 @@ class Client {
     return fs.existsSync('./keys/privkey.pem') && fs.existsSync('./keys/pubkey.pub');
   }
 
+
+
   getPeers() {
     let peers = [];
     let peerAddresses = [];
@@ -182,6 +185,33 @@ class Client {
     })
 
     return peerAddresses;
+  }
+
+  joinNetwork() {
+    this.peers.forEach(peer => {
+
+      const postData = ip.address()
+
+      const options = {
+        method: "POST",
+        hostname: peer,
+        port: 3000,
+        path: '/connection',
+      }
+
+      req = http.request(options, resp => {
+        resp.on('end', () => {
+          console.log("Joined network")
+        })
+      })
+
+      req.on('error', (e) {
+        console.log("There was a problem ")
+      })
+
+      req.write(postData)
+      req.end();
+    })
   }
 
   ping(peer) {
@@ -299,6 +329,14 @@ class Client {
     // GET peers -> Used to pull a list of peers from a node
     app.get('/peers', (req, res) => {
       res.json(this.getPeers());
+    })
+
+    // POST connection => Used to establish connection with peer
+
+    app.post('/connection', (req, res) => {
+      console.log(req.body);
+      this.peers.push(req.body);
+      res.send(`IP ${req.body} has joined the network`);
     })
 
     // POST peers -> Used to push a list of peers to a node
