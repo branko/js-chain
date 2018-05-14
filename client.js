@@ -64,7 +64,8 @@ class Client {
 
       request(options, (err, res, body) => {
         if (err) {
-          console.log(err)
+          this.peers = _(this.peers).without(peer)
+          console.log(`Kicked ${peer} off the network because it is non-responsive`)
         }
 
         console.log(body)
