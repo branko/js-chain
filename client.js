@@ -332,7 +332,9 @@ class Client {
     app.post('/connection', (req, res) => {
       console.log("Incoming!");
 
-      this.peers.push(res.body.ip);
+      this.peers.push(req.body.ip);
+      console.log("New joiner: " + req.body.ip)
+      console.log("Current peers: " + this.peers);
 
       // this.peers.push(req.body);
       res.send(`IP ${req.body.ip} has joined the network`);
@@ -376,9 +378,8 @@ class Client {
 
       if (checkArguments('--log')) {
         setInterval(() => {
-        let peers = this.getPeers();
-          CLI.puts(`You have ${peers.length} peers`)
-          CLI.puts("--> Current list of peers: " + peers.join(', '));
+          CLI.puts(`You have ${this.peers.length} peers`)
+          CLI.puts("--> Current list of peers: " + this.peers.join(', '));
         }, 3000);
       }
     })
