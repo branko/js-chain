@@ -9,6 +9,7 @@ const SHA1 = require('crypto-js/sha1');
 const miningEventEmitter = require('./scripts/miningEvents')
 const ip = require("ip");
 const request = require('request');
+const _ = require('underscore')
 
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
