@@ -78,7 +78,7 @@ class Blockchain {
         if (newBlock.nonce % 100 === 0) { process.stdout.write('.') }
       } else {
         // Compare local blockchain in blockchain.json with in memory blockchain
-        let localBlockhain = JSON.parse(Cache.readJSON())
+        let localBlockchain = JSON.parse(Cache.readJSON())
 
         if (localBlockchain.chain.length > this.chain.length) {
           this.chain = localBlockchain.chain;
