@@ -334,8 +334,7 @@ class Client {
       let currentBlockchain = JSON.parse(Cache.readJSON());
 
       if (this.validateIncomingBlockchain(incomingBlockchain, currentBlockchain)) {
-        eventEmitter.emit('incomingBlock');
-        
+
         if (currentBlockchain.chain.length < incomingBlockchain.chain.length) {
           Cache.write(JSON.stringify(incomingBlockchain, null, 4));
           this.blockchain = incomingBlockchain;

@@ -85,6 +85,7 @@ class Blockchain {
         if (!this.currentlyMining) {
           console.log('\n\n\n\n\n\n')
           console.log("Stopped mining...")
+
           this.pendingTransactions = [];
           clearInterval(miningInterval);
         }
