@@ -30,8 +30,9 @@ class Blockchain {
       new Transaction('Branko', "Steven", 50)
     ]);
 
-    genesisBlock.hash = this.SHA('hello world');
     genesisBlock.nonce = 0;
+    
+    genesisBlock.hash = this.SHA(genesisBlock);
 
     this.chain.push(genesisBlock);
   }
