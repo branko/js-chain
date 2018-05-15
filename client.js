@@ -57,8 +57,7 @@ class Client {
 
       let url = tunnelUrl || "http://" + peer + ':3000';
 
-      console.log(options)
-      
+
       const options = {
         method: "POST",
         url: url + "/blockchain",
@@ -67,6 +66,8 @@ class Client {
         json: this.blockchain.chain,
       }
 
+      console.log(options)
+      
       request(options, (err, res, body) => {
         if (err) {
           console.log(err)
