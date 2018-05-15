@@ -54,6 +54,7 @@ class Client {
   broadcastBlockchainToNetwork(tunnelUrl) {
     this.peers.forEach(peer => {
       console.log('Blockchain sent to ' + peer)
+
       let url = tunnelUrl || "http://" + peer + ':3000';
       const options = {
         method: "POST",
@@ -65,6 +66,7 @@ class Client {
 
       request(options, (err, res, body) => {
         if (err) {
+          console.log(err)
           this.peers = _(this.peers).without(peer)
           console.log(`Kicked ${peer} off the network because it is non-responsive`)
         }
