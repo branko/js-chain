@@ -9,7 +9,9 @@ const SHA1 = require('crypto-js/sha1');
 const eventEmitter = require('./scripts/miningEvents');
 const ip = require("ip");
 const request = require('request');
-const _ = require('underscore')
+const _ = require('underscore');
+const localtunnel = require('localtunnel');
+
 
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
@@ -57,8 +59,6 @@ class Client {
     this.peers.forEach(peer => {
       console.log('Blockchain sent to ' + peer)
 
-      // https://rude-fireant-81.localtunnel.me
-
       let url;
       if (!peer.match(/[a-z]/gi)) {
         url = "http://" + peer + ":3000";
@@ -75,8 +75,6 @@ class Client {
         headers: { 'Content-Type': 'application/json' },
         json: this.blockchain.chain,
       }
-
-      console.log(options)
 
       request(options, (err, res, body) => {
         if (err) {
@@ -462,20 +460,20 @@ if (checkArguments('--seed')) {
 
 // Steven's droplet: 167.99.180.30
 // Branko's droplet: 138.197.158.101
+  client = new Client();
+
+} else {
   let seed = "138.197.158.101";
 
   client = new Client(seed);
-} else {
-  client = new Client();
 }
 
 
 
-var localtunnel = require('localtunnel');
 
 if (checkArguments('--tunnel')) {
 
-  var tunnel = localtunnel(3000, function(err, tunnel) {
+  const tunnel = localtunnel(3000, function(err, tunnel) {
       if (err) {
         console.log(err)
       }
