@@ -51,28 +51,37 @@ class Client {
     })
   }
 
-  broadcastBlockchainToNetwork(tunnelUrl) {
+  broadcastBlockchainToNetwork() {
+    // https://rude-fireant-81.localtunnel.me
+
     this.peers.forEach(peer => {
       console.log('Blockchain sent to ' + peer)
 
-      let url = tunnelUrl || ("http://" + peer + ':3000');
+      // https://rude-fireant-81.localtunnel.me
 
+      let url;
+      if (!peer.match(/[a-z]/gi)) {
+        url = "http://" + peer;
+      } else {
+        url = peer;
+      }
+
+      console.log("URL: " + url)
 
       const options = {
         method: "POST",
-        url: url + "/blockchain",
+        url: url,
+        port: 3000,
         headers: { 'Content-Type': 'application/json' },
         json: this.blockchain.chain,
       }
-
-      tunnelUrl ? '' : (options.port = 3000);
 
       console.log(options)
 
       request(options, (err, res, body) => {
         if (err) {
           console.log(err)
-          this.peers = _(this.peers).without(peer)
+          this.peers = _(this.peers).without(peer);
           console.log(`Kicked ${peer} off the network because it is non-responsive`)
         }
 
