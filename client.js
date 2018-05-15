@@ -55,7 +55,7 @@ class Client {
     this.peers.forEach(peer => {
       console.log('Blockchain sent to ' + peer)
 
-      let url = tunnelUrl || "http://" + peer + ':3000';
+      let url = tunnelUrl || ("http://" + peer + ':3000');
 
 
       const options = {
@@ -67,7 +67,7 @@ class Client {
       }
 
       console.log(options)
-      
+
       request(options, (err, res, body) => {
         if (err) {
           console.log(err)
@@ -466,7 +466,7 @@ if (checkArguments('--tunnel')) {
 
       // the assigned public url for your tunnel
       // i.e. https://abcdefgjhij.localtunnel.me
-      console.log(tunnel.url)
+      console.log("This is the tunnel.url: " + tunnel.url)
 
       client.start(tunnel.url);
   });
