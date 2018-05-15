@@ -11,12 +11,11 @@ const REWARD_AMOUNT = 10;
 
 class Blockchain {
   constructor() {
+    
     this.chain = [];
     this.pendingTransactions = [];
     this.difficulty = 3;
     this.createGenesisBlock();
-
-    
   }
 
   static SHA(str) {
