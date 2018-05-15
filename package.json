@@ -23,6 +23,7 @@
     "crypto-js": "^3.1.9-1",
     "express": "^4.16.3",
     "ip": "^1.1.5",
+    "localtunnel": "^1.9.0",
     "request": "^2.85.0",
     "underscore": "^1.9.0",
     "web-midi-api": "^2.0.1",

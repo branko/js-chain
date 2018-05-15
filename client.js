@@ -9,7 +9,9 @@ const SHA1 = require('crypto-js/sha1');
 const eventEmitter = require('./scripts/miningEvents');
 const ip = require("ip");
 const request = require('request');
-const _ = require('underscore')
+const _ = require('underscore');
+const localtunnel = require('localtunnel');
+
 
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
@@ -52,12 +54,23 @@ class Client {
   }
 
   broadcastBlockchainToNetwork() {
+    // https://rude-fireant-81.localtunnel.me
+
     this.peers.forEach(peer => {
       console.log('Blockchain sent to ' + peer)
 
+      let url;
+      if (!peer.match(/[a-z]/gi)) {
+        url = "http://" + peer + ":3000";
+      } else {
+        url = peer;
+      }
+
+      console.log("URL: " + url)
+
       const options = {
         method: "POST",
-        url: "http://" + peer + ':3000' + "/blockchain",
+        url: url + '/blockchain',
         port: 3000,
         headers: { 'Content-Type': 'application/json' },
         json: this.blockchain.chain,
@@ -65,7 +78,8 @@ class Client {
 
       request(options, (err, res, body) => {
         if (err) {
-          this.peers = _(this.peers).without(peer)
+          console.log(err)
+          this.peers = _(this.peers).without(peer);
           console.log(`Kicked ${peer} off the network because it is non-responsive`)
         }
 
@@ -204,15 +218,21 @@ class Client {
     return peerAddresses;
   }
 
-  joinNetwork() {
+  joinNetwork(tunnelUrl) {
     this.peers.forEach(peer => {
-      console.log(ip.address());
+
+      let url;
+      if (!peer.match(/[a-z]/gi)) {
+        url = "http://" + peer + ":3000";
+      } else {
+        url = peer;
+      }
 
       const options = {
         method: "POST",
-        url: "http://" + peer + ':3000' + "/connection",
+        url: url + "/connection",
         port: 3000,
-        form: { ip: ip.address() },
+        form: { ip: tunnelUrl ? tunnelUrl : ip.address() },
       }
 
       request(options, (err, res, body) => {
@@ -295,8 +315,8 @@ class Client {
     })
   }
 
-  start() {
-    this.joinNetwork();
+  start(tunnelUrl) {
+    this.joinNetwork(tunnelUrl);
     this.pingAll();
 
     app.use(bodyParser.urlencoded())
@@ -337,7 +357,7 @@ class Client {
 
         if (currentBlockchain.chain.length < incomingBlockchain.chain.length) {
           Cache.write(JSON.stringify(incomingBlockchain, null, 4));
-          this.blockchain.stopMining()
+          this.blockchain.stopMining();
           this.blockchain = incomingBlockchain;
         }
 
@@ -371,6 +391,19 @@ class Client {
     // GET peers -> Used to pull a list of peers from a node
     app.get('/peers', (req, res) => {
       res.json(this.peers);
+    })
+
+    app.get('/all_transactions', (req, res) => {
+      // Iterate through blockchain and print
+      // every transaction in every block
+
+      // Possible output:
+        // Block # 1
+          // # of tx: 3
+          // tx, tx, tx
+        // Block # 2
+          // # of tx: 4
+          // tx, tx, tx, tx
     })
 
     // POST peers -> Used to push a list of peers to a node
@@ -440,12 +473,45 @@ if (checkArguments('--seed')) {
 
 // Steven's droplet: 167.99.180.30
 // Branko's droplet: 138.197.158.101
-  let seed = "167.99.180.30";
+  client = new Client();
+
+} else {
+  let seed = "138.197.158.101";
 
   client = new Client(seed);
-} else {
-  client = new Client();
 }
 
 
-client.start()
+
+
+if (checkArguments('--tunnel')) {
+
+  const tunnel = localtunnel(3000, function(err, tunnel) {
+      if (err) {
+        console.log(err)
+      }
+
+      // the assigned public url for your tunnel
+      // i.e. https://abcdefgjhij.localtunnel.me
+      console.log("This is the tunnel.url: " + tunnel.url)
+
+      client.start(tunnel.url);
+  });
+
+  tunnel.on('close', function() {
+      // tunnels are closed
+  });
+} else {
+  client.start()
+}
+
+
+
+
+
+
+
+
+
+
+

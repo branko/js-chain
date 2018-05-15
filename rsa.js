@@ -18,11 +18,11 @@ class RSA {
   }
 
   static getPrivateKey() {
-    return fs.readFileSync('privkey.pem').toString();
+    return fs.readFileSync('./keys/privkey.pem').toString();
   }
 
   static getPublicKey() {
-    return fs.readFileSync('pubkey.pub').toString();
+    return fs.readFileSync('./keys/pubkey.pub').toString();
   }
 
   static sign(message, privateKey) {

@@ -11,12 +11,11 @@ const REWARD_AMOUNT = 10;
 
 class Blockchain {
   constructor() {
+    
     this.chain = [];
     this.pendingTransactions = [];
     this.difficulty = 3;
     this.createGenesisBlock();
-
-    
   }
 
   static SHA(str) {
@@ -85,8 +84,14 @@ class Blockchain {
 
         if (!this.currentlyMining) {
           console.log('\n\n\n\n\n\n')
-          console.log("Stopped mining...")
+          console.log("Stopped mining...");
 
+
+          // Instead of emptying pendingTransactions
+          // We need to go through the latest block's transactions
+          // and delete from our pendingTransactions any matching
+          // transaction signatures
+          
           this.pendingTransactions = [];
           clearInterval(miningInterval);
         }
