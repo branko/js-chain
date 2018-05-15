@@ -393,6 +393,19 @@ class Client {
       res.json(this.peers);
     })
 
+    app.get('/all_transactions', (req, res) => {
+      // Iterate through blockchain and print
+      // every transaction in every block
+
+      // Possible output:
+        // Block # 1
+          // # of tx: 3
+          // tx, tx, tx
+        // Block # 2
+          // # of tx: 4
+          // tx, tx, tx, tx
+    })
+
     // POST peers -> Used to push a list of peers to a node
     app.post('/peers', (req, res) => {
       this.peers = _.union(this.peers, req.body);
