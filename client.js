@@ -61,10 +61,11 @@ class Client {
       const options = {
         method: "POST",
         url: url + "/blockchain",
-        port: 3000,
         headers: { 'Content-Type': 'application/json' },
         json: this.blockchain.chain,
       }
+
+      tunnelUrl ? '' : (options.port = 3000);
 
       console.log(options)
 
