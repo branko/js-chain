@@ -56,6 +56,9 @@ class Client {
       console.log('Blockchain sent to ' + peer)
 
       let url = tunnelUrl || "http://" + peer + ':3000';
+
+      console.log(options)
+      
       const options = {
         method: "POST",
         url: url + "/blockchain",
