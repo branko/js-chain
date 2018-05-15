@@ -222,11 +222,17 @@ class Client {
 
   joinNetwork(tunnelUrl) {
     this.peers.forEach(peer => {
-      console.log(tunnelUrl ? tunnelUrl : ip.address());
+
+      let url;
+      if (!peer.match(/[a-z]/gi)) {
+        url = "http://" + peer + ":3000";
+      } else {
+        url = peer;
+      }
 
       const options = {
         method: "POST",
-        url: "http://" + peer + ':3000' + "/connection",
+        url: url + "/connection",
         port: 3000,
         form: { ip: tunnelUrl ? tunnelUrl : ip.address() },
       }
