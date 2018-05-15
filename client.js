@@ -61,7 +61,7 @@ class Client {
 
       let url;
       if (!peer.match(/[a-z]/gi)) {
-        url = "http://" + peer;
+        url = "http://" + peer + ":3000";
       } else {
         url = peer;
       }
@@ -70,7 +70,7 @@ class Client {
 
       const options = {
         method: "POST",
-        url: url,
+        url: url + '/blockchain',
         port: 3000,
         headers: { 'Content-Type': 'application/json' },
         json: this.blockchain.chain,
