@@ -51,13 +51,13 @@ class Client {
     })
   }
 
-  broadcastBlockchainToNetwork() {
+  broadcastBlockchainToNetwork(tunnelUrl) {
     this.peers.forEach(peer => {
       console.log('Blockchain sent to ' + peer)
-
+      let url = tunnelUrl || "http://" + peer + ':3000';
       const options = {
         method: "POST",
-        url: "http://" + peer + ':3000' + "/blockchain",
+        url: url + "/blockchain",
         port: 3000,
         headers: { 'Content-Type': 'application/json' },
         json: this.blockchain.chain,
@@ -204,15 +204,15 @@ class Client {
     return peerAddresses;
   }
 
-  joinNetwork() {
+  joinNetwork(tunnelUrl) {
     this.peers.forEach(peer => {
-      console.log(ip.address());
+      console.log(tunnelUrl ? tunnelUrl : ip.address());
 
       const options = {
         method: "POST",
         url: "http://" + peer + ':3000' + "/connection",
         port: 3000,
-        form: { ip: ip.address() },
+        form: { ip: tunnelUrl ? tunnelUrl : ip.address() },
       }
 
       request(options, (err, res, body) => {
@@ -295,8 +295,8 @@ class Client {
     })
   }
 
-  start() {
-    this.joinNetwork();
+  start(tunnelUrl) {
+    this.joinNetwork(tunnelUrl);
     this.pingAll();
 
     app.use(bodyParser.urlencoded())
@@ -440,7 +440,7 @@ if (checkArguments('--seed')) {
 
 // Steven's droplet: 167.99.180.30
 // Branko's droplet: 138.197.158.101
-  let seed = "167.99.180.30";
+  let seed = "138.197.158.101";
 
   client = new Client(seed);
 } else {
@@ -448,4 +448,37 @@ if (checkArguments('--seed')) {
 }
 
 
-client.start()
+
+var localtunnel = require('localtunnel');
+
+if (checkArguments('--tunnel')) {
+
+  var tunnel = localtunnel(3000, function(err, tunnel) {
+      if (err) {
+        console.log(err)
+      }
+
+      // the assigned public url for your tunnel
+      // i.e. https://abcdefgjhij.localtunnel.me
+      console.log(tunnel.url)
+
+      client.start(tunnel.url);
+  });
+
+  tunnel.on('close', function() {
+      // tunnels are closed
+  });
+} else {
+  client.start()
+}
+
+
+
+
+
+
+
+
+
+
+
