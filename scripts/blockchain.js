@@ -4,6 +4,8 @@ const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const fs = require('fs');
+const _ = require('underscore');
+const RSA = require('../rsa')
 
 const eventEmitter = require('./miningEvents')
 
@@ -86,12 +88,11 @@ class Blockchain {
           console.log('\n\n\n\n\n\n')
           console.log("Stopped mining...");
 
-
           // Instead of emptying pendingTransactions
           // We need to go through the latest block's transactions
           // and delete from our pendingTransactions any matching
           // transaction signatures
-          
+
           this.pendingTransactions = [];
           clearInterval(miningInterval);
         }
@@ -124,6 +125,8 @@ class Blockchain {
         eventEmitter.emit('blockWasMined');
       }
     }, 0);
+    console.log(this.getOwnTransactions());
+    console.log("Your current balance is: " + this.getOwnBalance())
   }
 
   isValid() {
@@ -206,6 +209,47 @@ class Blockchain {
 
     }, 10000);
   }
+
+  //////////// NEW /////////////
+
+  getAllTransactions() {
+    return _.flatten(this.chain.map(block => {
+      return block.transactions
+    }))
+  }
+
+  getAllTransactionSignatures() {
+    return _.flatten(this.chain.map(block => {
+      return block.transactions.map(transaction => transaction.signature)
+    }))
+  }
+
+  getOwnTransactions() {
+    let publicKey = 'Branko' // RSA.getPublicKey();
+    let transactions = this.getAllTransactions()
+
+    return transactions.filter(tx => {
+      return tx.toAddress === publicKey || tx.fromAddress === publicKey
+    })
+  }
+
+  getOwnBalance() {
+    let balance = 0;
+    let publicKey = 'Branko' // RSA.getPublicKey();
+    let transactions = this.getAllTransactions();
+
+    transactions.forEach(tx => {
+      if (tx.fromAddress === publicKey) {
+        balance -= tx.amount;
+      } else if (tx.toAddress === publicKey) {
+        balance += tx.amount;
+      }
+    })
+    
+    return balance;
+  }
+
+  //////////////////////////////
 
   toString() {
     return JSON.stringify(this, null, 2);
