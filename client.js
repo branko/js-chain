@@ -207,9 +207,13 @@ class Client extends BasicClient {
         console.log("Verified!")
         res.send(`Pending transaction: ${transaction.fromAddress} to ${transaction.toAddress} for the amount of $${transaction.amount}`)
       } else {
+        console.log(`fromAddress: ${transaction.fromAddress}`)
+        console.log(fs.readFileSync('./keys/destination_key.pub'))
+        console.log(transaction.fromAddress === fs.readFileSync('./keys/destination_key.pub'))
+        console.log("======")
+
         console.log(`Balance for incoming: ${this.blockchain.getBalanceForAddress(transaction.fromAddress)}`)
         console.log(`Amount: ${transaction.amount}`)
-        console.log(`fromAddress: ${transaction.fromAddress}`)
         console.log("Verified Funds: " + this.blockchain.verifyTransactionFunds(transaction.fromAddress, transaction.amount))
         console.log("Verified Transaction: " +  Transaction.prototype.verify.call(transaction))
         console.log("Denied!")
