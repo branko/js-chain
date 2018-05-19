@@ -206,6 +206,8 @@ class Client extends BasicClient {
         console.log("Verified!")
         res.send(`Pending transaction: ${transaction.fromAddress} to ${transaction.toAddress} for the amount of $${transaction.amount}`)
       } else {
+        console.log("Verified Funds: " + this.blockchain.verifyTransactionFunds(transaction.fromAddress, transaction.amount))
+        console.log("Verified Transaction: " +  Transaction.prototype.verify.call(transaction))
         console.log("Denied!")
         res.send(`Transaction declined: Insufficient funds.`)
       }
