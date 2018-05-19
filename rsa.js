@@ -4,24 +4,24 @@ const fs = require('fs');
 
 class RSA {
   static generateKeys() {
-    let promise;
     console.log("Generating keys...");
 
     if (!fs.existsSync('./keys')) {
       fs.mkdirSync('./keys');
     }
 
-    if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys.pubkey.pub')) {
-      promise = new Promise(function(resolve, reject) {
+    let promise = new Promise(function(resolve, reject) {
+      if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys/pubkey.pub')) {
         exec('openssl genrsa -out ./keys/privkey.pem 1024', 'utf8', () => {
           exec('openssl rsa -in ./keys/privkey.pem -pubout > ./keys/pubkey.pub', 'utf8', () => {
             resolve();
           });
         })
-      })
-    } else {
-      console.log("Keys already exist");
-    }
+      } else {
+        reject(new Error("Keys not generated"));
+      }
+    })
+
 
     return promise
   }

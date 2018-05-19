@@ -6,8 +6,12 @@ const Cache = require('./scripts/cache');
 process.stdout.write('\033c');
 
 RSA.generateKeys().then(() => {
+  console.log("Keys generated")
+}).catch(err => {
+  console.log("Keys already generated")
+});;
 
-  let blockchain = new Blockchain();
+let blockchain = new Blockchain();
   blockchain.chain = JSON.parse(Cache.readJSON()).chain;
 
   let publicKey = RSA.getPublicKey();
@@ -23,7 +27,7 @@ RSA.generateKeys().then(() => {
 
   console.log(`Your public key is: \n\n${formattedKey}\n`)
   console.log(`You are part of ${transactions.length} transactions`)
-  console.log(`Our of ${allTransactions.length} total transactions`)
+  console.log(`Out of ${allTransactions.length} total transactions`)
 
   console.log("\n\nTransaction history (last 10 transactions):\n\n");
 
@@ -37,9 +41,6 @@ RSA.generateKeys().then(() => {
   }).join('\n'));
 
   console.log(`\n\nYour current balance is $${balance}`)
-});
-
-
 
 
 

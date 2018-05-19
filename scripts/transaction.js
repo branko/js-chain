@@ -1,4 +1,4 @@
-const RSA = require('../rsa')
+const RSA = require('../rsa');
 
 class Transaction {
   constructor(fromAddress, toAddress, amount) {

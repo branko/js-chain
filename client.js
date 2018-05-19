@@ -16,7 +16,8 @@ const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
 const RSA = require('./rsa');
 const CLI = require('./scripts/cli');
-const BasicClient = require('./basic_client')
+const BasicClient = require('./basic_client');
+const Transaction = require('./scripts/transaction')
 
 // Clears the screen
 process.stdout.write('\033c');
@@ -114,6 +115,8 @@ class Client extends BasicClient {
         RSA.generateKeys().then(() => {
           let identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
           this.promptMining();
+        }).catch(() => {
+          console.log("Keys already exist")
         });
 
         rl.close();
@@ -198,14 +201,33 @@ class Client extends BasicClient {
 
       // New transaction
     app.post('/transaction', (req, res) => {
-      const fromAddress = req.body.from;
-      const toAddress = req.body.to;
-      const amount = Number(req.body.amount);
-      const validTransaction = this.blockchain.createTransaction(fromAddress, toAddress, amount);
+      const transaction = req.body;
+      console.log('Incoming transaction!')
 
-      if (validTransaction) {
-        res.send(`Pending transaction: ${fromAddress} to ${toAddress} for the amount of $${amount}`)
+      console.log(`Balance for incoming: ${this.blockchain.getBalanceForAddress(transaction.fromAddress)}`)
+      console.log(`Amount: ${transaction.amount}`)
+      console.log("Verified Funds: " + this.blockchain.verifyTransactionFunds(transaction.fromAddress, transaction.amount))
+      console.log("Verified Transaction: " +  Transaction.prototype.verify.call(transaction))
+
+      if (this.blockchain.verifyTransactionFunds(transaction.fromAddress, +transaction.amount) &&
+          Transaction.prototype.verify.call(transaction)) {
+        console.log("Verified!")
+
+        if (this.blockchain.addToPendingTransactions(transaction)) {
+          console.log("Added to pending!")
+        } else {
+          console.log("Transaction already pending")
+        }
+
+        res.send(`Pending transaction: ${transaction.fromAddress} to ${transaction.toAddress} for the amount of $${transaction.amount}`)
       } else {
+        console.log(`fromAddress: ${transaction.fromAddress}`)
+        console.log(fs.readFileSync('./keys/destination_key.pub').toString())
+        console.log(transaction.fromAddress === fs.readFileSync('./keys/destination_key.pub').toString())
+        console.log("======")
+
+        
+        console.log("Denied!")
         res.send(`Transaction declined: Insufficient funds.`)
       }
     })
@@ -267,7 +289,7 @@ class Client extends BasicClient {
 
           answer.then((answers) => {
             console.log("\nNew transaction:")
-            console.log(`From: ${answers[0]}, To: ${answers[1]}, Amount: ${answers[2]}`)
+            console.log(`From: ${RSA.getPublicKey()}, To: ${answers[1]}, Amount: ${answers[2]}`)
             this.promptMining();
           }).catch((answer) => {
             console.log('Your answer was ' + answer)
@@ -296,6 +318,7 @@ if (checkArguments('--seed')) {
 
 // Steven's droplet: 167.99.180.30
 // Branko's droplet: 138.197.158.101
+// Branko's droplet 2: 165.227.34.12
   client = new Client();
 
 } else {
@@ -327,14 +350,3 @@ if (checkArguments('--tunnel')) {
 } else {
   client.start()
 }
-
-
-
-
-
-
-
-
-
-
-

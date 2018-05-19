@@ -44,21 +44,49 @@ class BasicClient {
     })
   }
 
+
+  formatPublicKey(publicKey) {
+    let header = "-----BEGIN PUBLIC KEY-----\n";
+    let footer = "-----END PUBLIC KEY-----";
+
+    let body = []
+    let publicKeyArr = publicKey.split('');
+    while (body.length < 4) {
+      body.push(publicKeyArr.splice(0, 64).join(''));
+    }
+
+    return header + body.join("\n") + "\n" + footer 
+
+  }
+
+  formatPublicKey(publicKey) {
+    let header = "-----BEGIN PUBLIC KEY-----\n";
+    let footer = "-----END PUBLIC KEY-----";
+
+    let body = []
+    let publicKeyArr = publicKey.split('');
+    while (body.length < 4) {
+      body.push(publicKeyArr.splice(0, 64).join(''));
+    }
+
+    return header + body.join("\n") + "\n" + footer;
+  }
+
   promptNewTransaction() {
     const rl = this.readlineInterface();
 
     return new Promise((resolve, reject) => {
       rl.question('\n\nWould you like to make a new transaction? [y/n]\n\n', (answer) => {
         if (answer === 'y') {
-          rl.question('\n\nWhat is the "to" address?\n\n', (fromAnswer) => {
+          rl.question('\n\nWhat is the "to" address?\n\n', (toAnswer) => {
             // Validate fromAnswer here
-            rl.question('\n\nWhat is the "from" address?\n\n', (toAnswer) => {
-              // Validate toAnswer here
-              rl.question('\n\nWhat is the amount?\n\n', (amountAnswer) => {
-                // Validate amountAnswer here
-                rl.close()
-                resolve([fromAnswer, toAnswer, amountAnswer])
-              })
+
+            toAnswer = this.formatPublicKey(toAnswer);
+
+            rl.question('\n\nWhat is the amount?\n\n', (amountAnswer) => {
+              // Validate amountAnswer here
+              rl.close()
+              resolve([RSA.getPublicKey(), toAnswer, amountAnswer])
             })
           })
         } else {

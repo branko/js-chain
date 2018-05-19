@@ -4,7 +4,8 @@ const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const fs = require('fs');
-const _ = require('underscore')
+const _ = require('underscore');
+const RSA = require('../rsa');
 
 const eventEmitter = require('./miningEvents')
 
@@ -12,7 +13,6 @@ const REWARD_AMOUNT = 10;
 
 class Blockchain {
   constructor() {
-    
     this.chain = [];
     this.pendingTransactions = [];
     this.difficulty = 3;
@@ -29,8 +29,8 @@ class Blockchain {
 
   createGenesisBlock() {
     const genesisBlock = new Block('0', null, [
-      new Transaction(null, 'Branko', 100),
-      new Transaction('Branko', "Steven", 50)
+      new Transaction(null, RSA.getPublicKey(), 100),
+      new Transaction(null, fs.readFileSync('./keys/destination_key.pub').toString(), 100)
     ]);
 
     genesisBlock.nonce = 0;
@@ -41,6 +41,15 @@ class Blockchain {
 
     if (!fs.existsSync('./public/blockchain.json')) {
       Cache.write(this)
+    }
+  }
+
+  addToPendingTransactions(transaction) {
+    if (!this.pendingTransactions.map(t => t.signature).includes(transaction.signature)) {
+      this.pendingTransactions.push(transaction);
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -61,7 +70,7 @@ class Blockchain {
   }
 
   createRewardTransaction() {
-    return new Transaction(null, 'Branko', REWARD_AMOUNT);
+    return new Transaction(null, RSA.getPublicKey(), REWARD_AMOUNT); // change Branko to winning miner
   }
 
   stopMining() {
@@ -92,8 +101,16 @@ class Blockchain {
           // We need to go through the latest block's transactions
           // and delete from our pendingTransactions any matching
           // transaction signatures
-          
-          this.pendingTransactions = [];
+
+          // get all signatures from transaction in recently mined block
+          // this.pendingTransactions = this.pendingTransaction.without(recentlyMinedTransactionsSignatures)
+
+          let signatures = this.getAllTransactionSignatures();
+
+          this.pendingTransactions = _(this.pendingTransactions).reject(t => {
+            return signatures.includes(t.signature);
+          })
+
           clearInterval(miningInterval);
         }
 
@@ -114,7 +131,13 @@ class Blockchain {
         console.log(newBlock.toString());
 
         this.chain.push(newBlock);
-        this.pendingTransactions = [];
+        
+
+        let signatures = this.getAllTransactionSignatures();
+
+        this.pendingTransactions = _(this.pendingTransactions).reject(t => {
+          return signatures.includes(t.signature);
+        })
 
         // Write to local .json file
         Cache.write(this.toString());
@@ -193,18 +216,26 @@ class Blockchain {
     const mine = setInterval(() => {
 
       // Dummy transaction
-      if (Math.random() > 0.5) {
-        this.createTransaction('Steven', 'Branko', Math.ceil(5 * Math.random()));
-      } else {
-        this.createTransaction('Branko', 'Steven', Math.ceil(5 * Math.random()));
-      }
+      // if (Math.random() > 0.5) {
+      //   this.createTransaction(
+      //     fs.readFileSync('./keys/pubkey.pub'),
+      //     fs.readFileSync('./keys/brankopubkey.pub'),
+      //     Math.ceil(5 * Math.random())
+      //   );
+      // } else {
+      //   this.createTransaction(
+      //     fs.readFileSync('./keys/brankopubkey.pub'),
+      //     fs.readFileSync('./keys/pubkey.pub'),
+      //     Math.ceil(5 * Math.random())
+      //   );
+      // }
 
       if (!this.currentlyMining) {
         console.log("\n\nFiring up the miner...\n\n")
         this.mineBlock();
       }
 
-    }, 10000);
+    }, 3000);
   }
 
   getAllTransactions() {
@@ -220,17 +251,17 @@ class Blockchain {
   }
 
   getOwnTransactions() {
-    let publicKey = 'Branko' // RSA.getPublicKey();
+    let publicKey = RSA.getPublicKey();
     let transactions = this.getAllTransactions()
 
     return transactions.filter(tx => {
-      return tx.toAddress === publicKey || tx.fromAddress === publicKey
+      return tx.toAddress === publicKey || tx.fromAddress === publicKey;
     })
   }
 
   getOwnBalance() {
     let balance = 0;
-    let publicKey = 'Branko' // RSA.getPublicKey();
+    let publicKey = RSA.getPublicKey();
     let transactions = this.getAllTransactions();
 
     transactions.forEach(tx => {
@@ -240,12 +271,16 @@ class Blockchain {
         balance += tx.amount;
       }
     })
-    
+
     return balance;
   }
 
   toString() {
     return JSON.stringify(this, null, 2);
+  }
+
+  verifyTransactionFunds(from, amount) {
+    return this.getBalanceForAddress(from) >= +amount;
   }
 }
 
