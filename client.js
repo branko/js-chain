@@ -202,7 +202,7 @@ class Client extends BasicClient {
       const transaction = req.body;
       console.log('Incoming transaction!')
 
-      if (this.blockchain.verifyTransactionFunds(transaction.fromAddress, transaction.amount) &&
+      if (this.blockchain.verifyTransactionFunds(transaction.fromAddress, +transaction.amount) &&
           Transaction.prototype.verify.call(transaction)) {
         console.log("Verified!")
         res.send(`Pending transaction: ${transaction.fromAddress} to ${transaction.toAddress} for the amount of $${transaction.amount}`)

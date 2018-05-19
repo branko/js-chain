@@ -257,7 +257,7 @@ class Blockchain {
   }
 
   verifyTransactionFunds(from, amount) {
-    return this.getBalanceForAddress(from) >= amount;
+    return this.getBalanceForAddress(from) >= +amount;
   }
 }
 
