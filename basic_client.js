@@ -55,7 +55,7 @@ class BasicClient {
             rl.question('\n\nWhat is the amount?\n\n', (amountAnswer) => {
               // Validate amountAnswer here
               rl.close()
-              resolve([RSA.getPublicKey(), fs.readFileSync('./keys/destination_key.pub'), amountAnswer])
+              resolve([RSA.getPublicKey(), fs.readFileSync('./keys/destination_key.pub').toString(), amountAnswer])
             })
           })
         } else {
