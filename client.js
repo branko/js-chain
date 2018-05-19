@@ -208,8 +208,8 @@ class Client extends BasicClient {
         res.send(`Pending transaction: ${transaction.fromAddress} to ${transaction.toAddress} for the amount of $${transaction.amount}`)
       } else {
         console.log(`fromAddress: ${transaction.fromAddress}`)
-        console.log(fs.readFileSync('./keys/destination_key.pub'))
-        console.log(transaction.fromAddress === fs.readFileSync('./keys/destination_key.pub'))
+        console.log(fs.readFileSync('./keys/destination_key.pub').toString())
+        console.log(transaction.fromAddress === fs.readFileSync('./keys/destination_key.pub').toString())
         console.log("======")
 
         console.log(`Balance for incoming: ${this.blockchain.getBalanceForAddress(transaction.fromAddress)}`)
