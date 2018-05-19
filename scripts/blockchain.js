@@ -207,6 +207,43 @@ class Blockchain {
     }, 10000);
   }
 
+  getAllTransactions() {
+    return _.flatten(this.chain.map(block => {
+      return block.transactions
+    }))
+  }
+
+  getAllTransactionSignatures() {
+    return _.flatten(this.chain.map(block => {
+      return block.transactions.map(transaction => transaction.signature)
+    }))
+  }
+
+  getOwnTransactions() {
+    let publicKey = 'Branko' // RSA.getPublicKey();
+    let transactions = this.getAllTransactions()
+
+    return transactions.filter(tx => {
+      return tx.toAddress === publicKey || tx.fromAddress === publicKey
+    })
+  }
+
+  getOwnBalance() {
+    let balance = 0;
+    let publicKey = 'Branko' // RSA.getPublicKey();
+    let transactions = this.getAllTransactions();
+
+    transactions.forEach(tx => {
+      if (tx.fromAddress === publicKey) {
+        balance -= tx.amount;
+      } else if (tx.toAddress === publicKey) {
+        balance += tx.amount;
+      }
+    })
+    
+    return balance;
+  }
+
   toString() {
     return JSON.stringify(this, null, 2);
   }
