@@ -198,13 +198,14 @@ class Client extends BasicClient {
 
       // New transaction
     app.post('/transaction', (req, res) => {
-      const fromAddress = req.body.from;
-      const toAddress = req.body.to;
-      const amount = Number(req.body.amount);
-      const validTransaction = this.blockchain.createTransaction(fromAddress, toAddress, amount);
-
-      if (validTransaction) {
-        res.send(`Pending transaction: ${fromAddress} to ${toAddress} for the amount of $${amount}`)
+      // const fromAddress = req.body.from;
+      // const toAddress = req.body.to;
+      // const amount = Number(req.body.amount);
+      // const validTransaction = this.blockchain.createTransaction(fromAddress, toAddress, amount);
+      const transaction = req.body;
+      if (blockchain.verifyTransactionFunds(transaction.fromAddress, transaction.amount) &&
+          Transaction.prototype.verify.call(transaction)) {
+        res.send(`Pending transaction: ${transaction.fromAddress} to ${transaction.toAddress} for the amount of $${amount}`)
       } else {
         res.send(`Transaction declined: Insufficient funds.`)
       }
@@ -327,14 +328,3 @@ if (checkArguments('--tunnel')) {
 } else {
   client.start()
 }
-
-
-
-
-
-
-
-
-
-
-

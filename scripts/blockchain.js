@@ -12,7 +12,7 @@ const REWARD_AMOUNT = 10;
 
 class Blockchain {
   constructor() {
-    
+
     this.chain = [];
     this.pendingTransactions = [];
     this.difficulty = 3;
@@ -92,7 +92,7 @@ class Blockchain {
           // We need to go through the latest block's transactions
           // and delete from our pendingTransactions any matching
           // transaction signatures
-          
+
           this.pendingTransactions = [];
           clearInterval(miningInterval);
         }
@@ -240,12 +240,16 @@ class Blockchain {
         balance += tx.amount;
       }
     })
-    
+
     return balance;
   }
 
   toString() {
     return JSON.stringify(this, null, 2);
+  }
+
+  verifyTransactionFunds(from, amount) {
+    return getBalanceForAddress(from) >= amount;
   }
 }
 
