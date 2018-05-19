@@ -59,7 +59,7 @@ class BasicClient {
 
   }
 
-  function formatPublicKey(publicKey) {
+  formatPublicKey(publicKey) {
     let header = "-----BEGIN PUBLIC KEY-----\n";
     let footer = "-----END PUBLIC KEY-----";
 
