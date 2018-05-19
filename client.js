@@ -198,14 +198,11 @@ class Client extends BasicClient {
 
       // New transaction
     app.post('/transaction', (req, res) => {
-      // const fromAddress = req.body.from;
-      // const toAddress = req.body.to;
-      // const amount = Number(req.body.amount);
-      // const validTransaction = this.blockchain.createTransaction(fromAddress, toAddress, amount);
       const transaction = req.body;
+
       if (this.blockchain.verifyTransactionFunds(transaction.fromAddress, transaction.amount) &&
           Transaction.prototype.verify.call(transaction)) {
-        res.send(`Pending transaction: ${transaction.fromAddress} to ${transaction.toAddress} for the amount of $${amount}`)
+        res.send(`Pending transaction: ${transaction.fromAddress} to ${transaction.toAddress} for the amount of $${transaction.amount}`)
       } else {
         res.send(`Transaction declined: Insufficient funds.`)
       }
@@ -268,7 +265,7 @@ class Client extends BasicClient {
 
           answer.then((answers) => {
             console.log("\nNew transaction:")
-            console.log(`From: ${answers[0]}, To: ${answers[1]}, Amount: ${answers[2]}`)
+            console.log(`From: ${RSA.getPublicKey()}, To: ${answers[1]}, Amount: ${answers[2]}`)
             this.promptMining();
           }).catch((answer) => {
             console.log('Your answer was ' + answer)

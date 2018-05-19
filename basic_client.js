@@ -50,15 +50,12 @@ class BasicClient {
     return new Promise((resolve, reject) => {
       rl.question('\n\nWould you like to make a new transaction? [y/n]\n\n', (answer) => {
         if (answer === 'y') {
-          rl.question('\n\nWhat is the "to" address?\n\n', (fromAnswer) => {
+          rl.question('\n\nWhat is the "to" address?\n\n', (toAnswer) => {
             // Validate fromAnswer here
-            rl.question('\n\nWhat is the "from" address?\n\n', (toAnswer) => {
-              // Validate toAnswer here
-              rl.question('\n\nWhat is the amount?\n\n', (amountAnswer) => {
-                // Validate amountAnswer here
-                rl.close()
-                resolve([fromAnswer, toAnswer, amountAnswer])
-              })
+            rl.question('\n\nWhat is the amount?\n\n', (amountAnswer) => {
+              // Validate amountAnswer here
+              rl.close()
+              resolve([RSA.getPublicKey(), fs.readFileSync('./keys/destination_key.pub'), amountAnswer])
             })
           })
         } else {

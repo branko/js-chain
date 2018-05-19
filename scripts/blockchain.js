@@ -4,7 +4,8 @@ const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const fs = require('fs');
-const _ = require('underscore')
+const _ = require('underscore');
+const RSA = require('../rsa');
 
 const eventEmitter = require('./miningEvents')
 
@@ -12,7 +13,6 @@ const REWARD_AMOUNT = 10;
 
 class Blockchain {
   constructor() {
-
     this.chain = [];
     this.pendingTransactions = [];
     this.difficulty = 3;
@@ -29,8 +29,7 @@ class Blockchain {
 
   createGenesisBlock() {
     const genesisBlock = new Block('0', null, [
-      new Transaction(null, 'Branko', 100),
-      new Transaction('Branko', "Steven", 50)
+      new Transaction(null, RSA.getPublicKey(), 100),
     ]);
 
     genesisBlock.nonce = 0;
@@ -61,7 +60,7 @@ class Blockchain {
   }
 
   createRewardTransaction() {
-    return new Transaction(null, 'Branko', REWARD_AMOUNT); // change Branko to winning miner
+    return new Transaction(null, RSA.getPublicKey(), REWARD_AMOUNT); // change Branko to winning miner
   }
 
   stopMining() {
@@ -193,19 +192,19 @@ class Blockchain {
     const mine = setInterval(() => {
 
       // Dummy transaction
-      if (Math.random() > 0.5) {
-        this.createTransaction(
-          fs.readFileSync('./keys/pubkey.pub'),
-          fs.readFileSync('./keys/brankopubkey.pub'),
-          Math.ceil(5 * Math.random())
-        );
-      } else {
-        this.createTransaction(
-          fs.readFileSync('./keys/brankopubkey.pub'),
-          fs.readFileSync('./keys/pubkey.pub'),
-          Math.ceil(5 * Math.random())
-        );
-      }
+      // if (Math.random() > 0.5) {
+      //   this.createTransaction(
+      //     fs.readFileSync('./keys/pubkey.pub'),
+      //     fs.readFileSync('./keys/brankopubkey.pub'),
+      //     Math.ceil(5 * Math.random())
+      //   );
+      // } else {
+      //   this.createTransaction(
+      //     fs.readFileSync('./keys/brankopubkey.pub'),
+      //     fs.readFileSync('./keys/pubkey.pub'),
+      //     Math.ceil(5 * Math.random())
+      //   );
+      // }
 
       if (!this.currentlyMining) {
         console.log("\n\nFiring up the miner...\n\n")
@@ -228,17 +227,17 @@ class Blockchain {
   }
 
   getOwnTransactions() {
-    let publicKey = 'Branko' // RSA.getPublicKey();
+    let publicKey = RSA.getPublicKey();
     let transactions = this.getAllTransactions()
 
     return transactions.filter(tx => {
-      return tx.toAddress === publicKey || tx.fromAddress === publicKey
+      return tx.toAddress === publicKey || tx.fromAddress === publicKey;
     })
   }
 
   getOwnBalance() {
     let balance = 0;
-    let publicKey = 'Branko' // RSA.getPublicKey();
+    let publicKey = RSA.getPublicKey();
     let transactions = this.getAllTransactions();
 
     transactions.forEach(tx => {
