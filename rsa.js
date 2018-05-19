@@ -11,7 +11,7 @@ class RSA {
       fs.mkdirSync('./keys');
     }
 
-    if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys.pubkey.pub')) {
+    if (!fs.existsSync('./keys/privkey.pem') || !fs.existsSync('./keys/pubkey.pub')) {
       promise = new Promise(function(resolve, reject) {
         exec('openssl genrsa -out ./keys/privkey.pem 1024', 'utf8', () => {
           exec('openssl rsa -in ./keys/privkey.pem -pubout > ./keys/pubkey.pub', 'utf8', () => {
