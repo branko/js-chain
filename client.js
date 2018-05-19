@@ -115,6 +115,8 @@ class Client extends BasicClient {
         RSA.generateKeys().then(() => {
           let identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
           this.promptMining();
+        }).catch(() => {
+          console.log("Keys already exist")
         });
 
         rl.close();

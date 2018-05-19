@@ -29,11 +29,16 @@ function checkArguments(arg) {
 class TransactionClient extends BasicClient {
   constructor(seed) {
     super(seed);
-    RSA.generateKeys();
+    RSA.generateKeys().then(()=>{
+      console.log("Keys generated")
+    }).catch(err => {
+      console.log('yep')
+    });
   }
 
   start(tunnelUrl) {
     this.joinNetwork();
+    console.log("HEY")
     this.promptNewTransaction().then(transactionInfo => {
       let transaction = new Transaction(...transactionInfo);
       for (let peerURL of this.peers) {
@@ -47,6 +52,8 @@ class TransactionClient extends BasicClient {
         })
         request.send(JSON.stringify(transaction));
       }
+    }).catch((err) => {
+      console.log("Keys already exist")
     })
   }
 }
