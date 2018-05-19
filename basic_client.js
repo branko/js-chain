@@ -44,6 +44,34 @@ class BasicClient {
     })
   }
 
+
+  formatPublicKey(publicKey) {
+    let header = "-----BEGIN PUBLIC KEY-----\n";
+    let footer = "-----END PUBLIC KEY-----";
+
+    let body = []
+    let publicKeyArr = publicKey.split('');
+    while (body.length < 4) {
+      body.push(publicKeyArr.splice(0, 64).join(''));
+    }
+
+    return header + body.join("\n") + "\n" + footer 
+
+  }
+
+  function formatPublicKey(publicKey) {
+    let header = "-----BEGIN PUBLIC KEY-----\n";
+    let footer = "-----END PUBLIC KEY-----";
+
+    let body = []
+    let publicKeyArr = publicKey.split('');
+    while (body.length < 4) {
+      body.push(publicKeyArr.splice(0, 64).join(''));
+    }
+
+    return header + body.join("\n") + "\n" + footer;
+  }
+
   promptNewTransaction() {
     const rl = this.readlineInterface();
 
@@ -52,10 +80,13 @@ class BasicClient {
         if (answer === 'y') {
           rl.question('\n\nWhat is the "to" address?\n\n', (toAnswer) => {
             // Validate fromAnswer here
+
+            toAnswer = this.formatPublicKey(toAnswer);
+
             rl.question('\n\nWhat is the amount?\n\n', (amountAnswer) => {
               // Validate amountAnswer here
               rl.close()
-              resolve([RSA.getPublicKey(), fs.readFileSync('./keys/destination_key.pub').toString(), amountAnswer])
+              resolve([RSA.getPublicKey(), toAnswer, amountAnswer])
             })
           })
         } else {
