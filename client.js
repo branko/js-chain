@@ -12,11 +12,11 @@ const request = require('request');
 const _ = require('underscore');
 const localtunnel = require('localtunnel');
 
-
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
 const RSA = require('./rsa');
 const CLI = require('./scripts/cli');
+const BasicClient = require('./basic_client')
 
 // Clears the screen
 process.stdout.write('\033c');
@@ -27,24 +27,9 @@ function checkArguments(arg) {
 
 const REWARD_AMOUNT = 10;
 
-class Client {
+class Client extends BasicClient {
   constructor(seed) {
-    this.peers = [];
-
-    if (seed) {
-      this.seed = seed;
-      this.peers.push(seed)
-    }
-
-    this.blockchain = new Blockchain();
-
-    if (fs.existsSync('./public/blockchain.json')) {
-      let cachedBlockchain = JSON.parse(fs.readFileSync('./public/blockchain.json'))
-      this.blockchain.chain = cachedBlockchain.chain
-    } else {
-      if (!fs.existsSync('./public')) { fs.mkdirSync('public') };
-      exec('touch ./public/blockchain.json');
-    }
+    super(seed);
 
     eventEmitter.on('blockWasMined', () => {
       this.blockchain.broadcastBlockchain(this.getPeers());
@@ -53,7 +38,6 @@ class Client {
   }
 
   broadcastBlockchainToNetwork() {
-
     this.peers.forEach(peer => {
       console.log('Blockchain sent to ' + peer)
 
@@ -120,13 +104,6 @@ class Client {
     return true
   }
 
-  readlineInterface() {
-    return readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    })
-  }
-
   promptKeyGeneration() {
     const rl = this.readlineInterface();
 
@@ -134,9 +111,8 @@ class Client {
       if (answer === 'y') {
         CLI.puts("Generating keys...")
 
-        RSA.generateKeys().then((val) => {
+        RSA.generateKeys().then(() => {
           let identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
-
           this.promptMining();
         });
 
@@ -163,147 +139,6 @@ class Client {
         rl.close()
       }
     });
-  }
-
-  promptNewTransaction() {
-    const rl = this.readlineInterface();
-
-    return new Promise((resolve, reject) => {
-      rl.question('\n\nWould you like to make a new transaction? [y/n]\n\n', (answer) => {
-        if (answer === 'y') {
-          rl.question('\n\nWhat is the "to" address?\n\n', (fromAnswer) => {
-            // Validate fromAnswer here
-            rl.question('\n\nWhat is the "from" address?\n\n', (toAnswer) => {
-              // Validate toAnswer here
-              rl.question('\n\nWhat is the amount?\n\n', (amountAnswer) => {
-                // Validate amountAnswer here
-                rl.close()
-                resolve([fromAnswer, toAnswer, amountAnswer])
-              })
-            })
-          })
-        } else {
-          rl.close()
-          reject(answer)
-        }
-      })
-    })
-  }
-
-  keysExist() {
-    return fs.existsSync('./keys/privkey.pem') && fs.existsSync('./keys/pubkey.pub');
-  }
-
-  getPeers() {
-    let peers = [];
-    let peerAddresses = [];
-
-    peers.forEach(bucket => {
-      if (bucket.head) {
-        bucket.forEach(peer => {
-          peerAddresses.push(peer.hostname + ':' + peer.port)
-        })
-      }
-    })
-
-    return peerAddresses;
-  }
-
-  joinNetwork(tunnelUrl) {
-    this.peers.forEach(peer => {
-
-      let url;
-      if (!peer.match(/[a-z]/gi)) {
-        url = "http://" + peer + ":3000";
-      } else {
-        url = peer;
-      }
-
-      const options = {
-        method: "POST",
-        url: url + "/connection",
-        port: 3000,
-        form: { ip: tunnelUrl ? tunnelUrl : ip.address() },
-      }
-
-      request(options, (err, res, body) => {
-        if (err) {
-          console.log(err)
-        }
-
-        console.log(body)
-      })
-    })
-  }
-
-  ping(peer) {
-    const options = {
-      hostname: peer,
-      port: 3000,
-      path: '/status',
-    }
-
-    http.get(options, (resp) => {
-      let data = '';
-
-      // A chunk of data has been recieved.
-      resp.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      // The whole response has been received. Print out the result.
-      resp.on('end', () => {
-        console.log(data);
-      });
-
-    }).on("error", (err) => {
-      console.log("Error: " + err.message);
-    })
-  }
-
-  pingAll() {
-    console.log("Trying to ping all")
-    // Iterate over all peers and ping them
-
-    this.peers.forEach(peer => {
-      this.ping(peer);
-    })
-  }
-
-  pullPeers() {
-    this.peers.forEach(peer => {
-      const options = {
-        method: "GET",
-        url: "http://" + peer + ':3000' + "/peers",
-        port: 3000,
-      }
-
-      request(options, (err, res, body) => {
-        if (err) {
-          console.log(err)
-        }
-        console.log(body)
-      })
-    })
-  }
-
-  pushPeersToNetwork() {
-    this.peers.forEach(peer => {
-      const options = {
-        method: "POST",
-        url: "http://" + peer + ':3000' + "/peers",
-        port: 3000,
-        json: this.peers,
-        headers: {'Content-Type': 'application/json'}
-      }
-
-      request(options, (err, res, body) => {
-        if (err) {
-          console.log(err)
-        }
-        console.log(body)
-      })
-    })
   }
 
   start(tunnelUrl) {
@@ -335,7 +170,7 @@ class Client {
 
       // New blockchain
     app.post('/blockchain', (req, res) => {
-      console.log("INCOMING BLOCKCHAIN!");
+      console.log("Incoming blockchain...!");
 
       let incomingChain = req.body;
       let incomingBlockchain = new Blockchain;
@@ -350,9 +185,12 @@ class Client {
           Cache.write(JSON.stringify(incomingBlockchain, null, 4));
           this.blockchain.stopMining();
           this.blockchain = incomingBlockchain;
+          console.log(`Recieved blockchain accepted, length: ${incomingBlockchain.chain.length}`)
+        } else {
+          console.log(`Recieved blockchain is shorter than your local blockchain (${currentBlockchain.chain.length} vs ${incomingBlockchain.chain.length})`)
         }
 
-        res.send('Thank you for your blockchain')
+        res.send('Blockchain recieved')
       } else {
         res.send('Invalid blockchain.')
       }

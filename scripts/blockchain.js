@@ -4,6 +4,7 @@ const Transaction = require('./transaction');
 const SHA256 = require('crypto-js/sha256');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const fs = require('fs');
+const _ = require('underscore')
 
 const eventEmitter = require('./miningEvents')
 
@@ -116,7 +117,6 @@ class Blockchain {
         this.pendingTransactions = [];
 
         // Write to local .json file
-
         Cache.write(this.toString());
 
         clearInterval(miningInterval);
