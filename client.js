@@ -16,7 +16,6 @@ const localtunnel = require('localtunnel');
 const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
 const RSA = require('./rsa');
-// const kademlia = require('./kademlia');
 const CLI = require('./scripts/cli');
 
 // Clears the screen
@@ -54,7 +53,6 @@ class Client {
   }
 
   broadcastBlockchainToNetwork() {
-    // https://rude-fireant-81.localtunnel.me
 
     this.peers.forEach(peer => {
       console.log('Blockchain sent to ' + peer)
@@ -138,7 +136,6 @@ class Client {
 
         RSA.generateKeys().then((val) => {
           let identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
-          // this.kademliaNode = kademlia(identity, this.seed ? this.seed : undefined);
 
           this.promptMining();
         });
@@ -200,12 +197,6 @@ class Client {
   getPeers() {
     let peers = [];
     let peerAddresses = [];
-
-    // this.kademliaNode.router.forEach((bucket) => {
-    //   if (bucket.head) {
-    //     peers.push(bucket)
-    //   }
-    // })
 
     peers.forEach(bucket => {
       if (bucket.head) {
@@ -433,8 +424,6 @@ class Client {
         this.identity = SHA1(fs.readFileSync('./keys/pubkey.pub')).toString();
         CLI.puts(`Your public key: ${this.identity}`)
 
-        // this.kademliaNode = kademlia(this.identity, this.seed);
-
         if (checkArguments('--t')) {
           let answer = this.promptNewTransaction()
 
@@ -466,10 +455,6 @@ class Client {
 let client;
 
 if (checkArguments('--seed')) {
-  // let seed = ['9844f81e1408f6ecb932137d33bed7cfdcf518a3', {
-  //   hostname: '167.99.180.30',
-  //   port: 3000
-  // }];
 
 // Steven's droplet: 167.99.180.30
 // Branko's droplet: 138.197.158.101
