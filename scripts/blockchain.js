@@ -30,7 +30,7 @@ class Blockchain {
   createGenesisBlock() {
     const genesisBlock = new Block('0', null, [
       new Transaction(null, RSA.getPublicKey(), 100),
-      new Transaction(null, fs.readFileSync('./keys/destination_key.pub').toString())
+      new Transaction(null, fs.readFileSync('./keys/destination_key.pub').toString(), 100)
     ]);
 
     genesisBlock.nonce = 0;
