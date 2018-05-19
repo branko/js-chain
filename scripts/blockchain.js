@@ -102,7 +102,15 @@ class Blockchain {
           // and delete from our pendingTransactions any matching
           // transaction signatures
 
-          this.pendingTransactions = [];
+          // get all signatures from transaction in recently mined block
+          // this.pendingTransactions = this.pendingTransaction.without(recentlyMinedTransactionsSignatures)
+
+          let signatures = this.getAllTransactionSignatures();
+
+          this.pendingTransactions = _(this.pendingTransactions).reject(t => {
+            return signatures.includes(t.signature);
+          })
+
           clearInterval(miningInterval);
         }
 
@@ -123,7 +131,13 @@ class Blockchain {
         console.log(newBlock.toString());
 
         this.chain.push(newBlock);
-        this.pendingTransactions = [];
+        
+
+        let signatures = this.getAllTransactionSignatures();
+
+        this.pendingTransactions = _(this.pendingTransactions).reject(t => {
+          return signatures.includes(t.signature);
+        })
 
         // Write to local .json file
         Cache.write(this.toString());
