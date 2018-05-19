@@ -16,7 +16,8 @@ const Cache = require('./scripts/cache');
 const Blockchain = require('./scripts/blockchain');
 const RSA = require('./rsa');
 const CLI = require('./scripts/cli');
-const BasicClient = require('./basic_client')
+const BasicClient = require('./basic_client');
+const Transaction = require('./scripts/transaction')
 
 // Clears the screen
 process.stdout.write('\033c');
