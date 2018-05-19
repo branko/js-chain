@@ -203,7 +203,7 @@ class Client extends BasicClient {
       // const amount = Number(req.body.amount);
       // const validTransaction = this.blockchain.createTransaction(fromAddress, toAddress, amount);
       const transaction = req.body;
-      if (blockchain.verifyTransactionFunds(transaction.fromAddress, transaction.amount) &&
+      if (this.blockchain.verifyTransactionFunds(transaction.fromAddress, transaction.amount) &&
           Transaction.prototype.verify.call(transaction)) {
         res.send(`Pending transaction: ${transaction.fromAddress} to ${transaction.toAddress} for the amount of $${amount}`)
       } else {
@@ -297,6 +297,7 @@ if (checkArguments('--seed')) {
 
 // Steven's droplet: 167.99.180.30
 // Branko's droplet: 138.197.158.101
+// Branko's droplet 2: 165.227.34.12
   client = new Client();
 
 } else {

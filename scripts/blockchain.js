@@ -61,7 +61,7 @@ class Blockchain {
   }
 
   createRewardTransaction() {
-    return new Transaction(null, 'Branko', REWARD_AMOUNT);
+    return new Transaction(null, 'Branko', REWARD_AMOUNT); // change Branko to winning miner
   }
 
   stopMining() {
@@ -194,9 +194,17 @@ class Blockchain {
 
       // Dummy transaction
       if (Math.random() > 0.5) {
-        this.createTransaction('Steven', 'Branko', Math.ceil(5 * Math.random()));
+        this.createTransaction(
+          fs.readFileSync('./keys/pubkey.pub'),
+          fs.readFileSync('./keys/brankopubkey.pub'),
+          Math.ceil(5 * Math.random())
+        );
       } else {
-        this.createTransaction('Branko', 'Steven', Math.ceil(5 * Math.random()));
+        this.createTransaction(
+          fs.readFileSync('./keys/brankopubkey.pub'),
+          fs.readFileSync('./keys/pubkey.pub'),
+          Math.ceil(5 * Math.random())
+        );
       }
 
       if (!this.currentlyMining) {
@@ -204,7 +212,7 @@ class Blockchain {
         this.mineBlock();
       }
 
-    }, 10000);
+    }, 3000);
   }
 
   getAllTransactions() {
@@ -249,7 +257,7 @@ class Blockchain {
   }
 
   verifyTransactionFunds(from, amount) {
-    return getBalanceForAddress(from) >= amount;
+    return this.getBalanceForAddress(from) >= amount;
   }
 }
 

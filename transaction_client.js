@@ -38,15 +38,13 @@ class TransactionClient extends BasicClient {
       let transaction = new Transaction(...transactionInfo);
       for (let peerURL of this.peers) {
         const request = new XMLHttpRequest();
-
-        request.open('POST', "http://" + peerURL + '/transaction');
+        request.open('POST', "http://" + peerURL + ':3000/transaction');
         request.setRequestHeader('Content-Type', 'application/json')
 
         request.addEventListener('load', () => {
           console.log(request.status);
           console.log(request.response);
         })
-
         request.send(JSON.stringify(transaction));
       }
     })
