@@ -202,9 +202,21 @@ class Client extends BasicClient {
       const transaction = req.body;
       console.log('Incoming transaction!')
 
+      console.log(`Balance for incoming: ${this.blockchain.getBalanceForAddress(transaction.fromAddress)}`)
+      console.log(`Amount: ${transaction.amount}`)
+      console.log("Verified Funds: " + this.blockchain.verifyTransactionFunds(transaction.fromAddress, transaction.amount))
+      console.log("Verified Transaction: " +  Transaction.prototype.verify.call(transaction))
+
       if (this.blockchain.verifyTransactionFunds(transaction.fromAddress, +transaction.amount) &&
           Transaction.prototype.verify.call(transaction)) {
         console.log("Verified!")
+
+        if (this.blockchain.addToPendingTransactions(transaction)) {
+          console.log("Added to pending!")
+        } else {
+          console.log("Transaction already pending")
+        }
+
         res.send(`Pending transaction: ${transaction.fromAddress} to ${transaction.toAddress} for the amount of $${transaction.amount}`)
       } else {
         console.log(`fromAddress: ${transaction.fromAddress}`)
@@ -212,10 +224,7 @@ class Client extends BasicClient {
         console.log(transaction.fromAddress === fs.readFileSync('./keys/destination_key.pub').toString())
         console.log("======")
 
-        console.log(`Balance for incoming: ${this.blockchain.getBalanceForAddress(transaction.fromAddress)}`)
-        console.log(`Amount: ${transaction.amount}`)
-        console.log("Verified Funds: " + this.blockchain.verifyTransactionFunds(transaction.fromAddress, transaction.amount))
-        console.log("Verified Transaction: " +  Transaction.prototype.verify.call(transaction))
+        
         console.log("Denied!")
         res.send(`Transaction declined: Insufficient funds.`)
       }

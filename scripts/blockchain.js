@@ -44,6 +44,15 @@ class Blockchain {
     }
   }
 
+  addToPendingTransactions(transaction) {
+    if (!this.pendingTransactions.map(t => t.signature).includes(transaction.signature)) {
+      this.pendingTransactions.push(transaction);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   broadcastBlockchain(peers) {
     for (let peerURL of peers) {
       const request = new XMLHttpRequest();
